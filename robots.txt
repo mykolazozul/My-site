@@ -1,0 +1,17 @@
+# Robots.txt for Mykola Zozul — Executive Portfolio & Product Designer
+# Optimized by SEO & Search Dominance Strategist
+
+User-agent: *
+Allow: /
+Allow: /links
+Allow: /assets/
+Allow: /assets/images/
+Allow: /assets/css/
+Allow: /assets/js/
+
+# Prevent search bots from indexing internal draft files
+Disallow: /.agents/
+Disallow: /Ideas/
+
+# XML Sitemap declaration
+Sitemap: https://mykolazozul.com/sitemap.xml

@@ -1,0 +1,24 @@
+# Operating System files
+Thumbs.db
+desktop.ini
+.DS_Store
+$RECYCLE.BIN/
+
+# Executables & Binaries (GitHub 100MB limit & installers)
+*.exe
+*.msi
+*.dmg
+*.pkg
+*.iso
+
+# Node & dependencies
+node_modules/
+npm-debug.log*
+
+# Scratch & temporary
+scratch/
+tmp/
+*.tmp
+*.log
+.env
+.env.*

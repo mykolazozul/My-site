@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="uk" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>404 — Сторінку не знайдено // Route Not Found | Mykola Zozul</title>
+  <meta name="description" content="Помилка 404. Сторінку не знайдено. Офіційне портфоліо та контакти Миколи Зозуля (COO & Senior Product Designer).">
+  <meta name="robots" content="noindex, follow">
+  <meta name="theme-color" content="#000000">
+
+  <!-- Early Theme Init -->
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('mz_theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    })();
+  </script>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23000000'/%3E%3Ctext x='16' y='22' fill='%23ffffff' font-family='sans-serif' font-weight='900' font-size='16' text-anchor='middle'%3EMZ%3C/text%3E%3C/svg%3E">
+
+  <!-- Self-Hosted Typography Stack with Cyrillic & Latin support -->
+  <link rel="stylesheet" href="/assets/css/fonts.css">
+
+  <style>
+    :root {
+      --bg: #000000;
+      --bg-surface: #07090e;
+      --card: #0d1118;
+      --line: rgba(255, 255, 255, 0.08);
+      --line-strong: rgba(255, 255, 255, 0.2);
+      --text: #ffffff;
+      --muted: #94a3b8;
+      --dim: #475569;
+      --accent: #ffffff;
+      --glow: rgba(255, 255, 255, 0.15);
+      --highlight: #00f0ff;
+      --font-display: 'Unbounded', -apple-system, sans-serif;
+      --font-body: 'Manrope', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      color-scheme: dark;
+    }
+
+    :root[data-theme="light"] {
+      --bg: #ffffff;
+      --bg-surface: #f8fafc;
+      --card: #f1f5f9;
+      --line: rgba(0, 0, 0, 0.08);
+      --line-strong: rgba(0, 0, 0, 0.22);
+      --text: #090c12;
+      --muted: #475569;
+      --dim: #64748b;
+      --accent: #000000;
+      --glow: rgba(0, 0, 0, 0.08);
+      --highlight: #0284c7;
+      color-scheme: light;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 32px 20px;
+      position: relative;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      transition: background-color 0.25s ease, color 0.25s ease;
+    }
+
+    /* Ambient Spotlight & Noise */
+    .ambient-glow {
+      position: fixed;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--glow) 0%, transparent 70%);
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      z-index: 1;
+      opacity: 0.6;
+      transition: transform 0.15s ease-out;
+    }
+
+    .noise-overlay {
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* Giant Background Typographic Matrix */
+    .backdrop-404 {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -52%);
+      font-family: var(--font-display);
+      font-size: clamp(140px, 28vw, 380px);
+      font-weight: 900;
+      letter-spacing: -0.05em;
+      line-height: 0.8;
+      color: transparent;
+      -webkit-text-stroke: 1.5px var(--line);
+      opacity: 0.65;
+      user-select: none;
+      pointer-events: none;
+      z-index: 0;
+      white-space: nowrap;
+    }
+
+    /* Central Content Card */
+    .error-card {
+      position: relative;
+      z-index: 10;
+      max-width: 680px;
+      width: 100%;
+      background: var(--bg-surface);
+      border: 1px solid var(--line-strong);
+      border-radius: 24px;
+      padding: clamp(32px, 6vw, 56px);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6), 0 0 1px var(--line-strong);
+      backdrop-filter: blur(20px);
+      text-align: center;
+      animation: cardAppear 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes cardAppear {
+      0% {
+        opacity: 0;
+        transform: translateY(24px) scale(0.98);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    /* Top Controls */
+    .card-top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--line);
+      color: var(--muted);
+    }
+
+    .pulse-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #ff3366;
+      box-shadow: 0 0 10px #ff3366;
+      animation: pulse 2s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    .theme-toggle-btn {
+      background: transparent;
+      border: 1px solid var(--line);
+      color: var(--text);
+      font-size: 14px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      transition: all 0.2s ease;
+    }
+
+    .theme-toggle-btn:hover {
+      border-color: var(--text);
+      transform: scale(1.05);
+    }
+
+    .theme-icon-svg {
+      width: 18px;
+      height: 18px;
+      flex: none;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transition: transform 0.25s ease, opacity 0.2s ease;
+      pointer-events: none;
+    }
+    .theme-toggle-btn .sun-icon { display: block !important; }
+    .theme-toggle-btn .moon-icon { display: none !important; }
+
+    :root[data-theme="dark"] .theme-toggle-btn .sun-icon,
+    [data-theme="dark"] .theme-toggle-btn .sun-icon { display: block !important; }
+
+    :root[data-theme="dark"] .theme-toggle-btn .moon-icon,
+    [data-theme="dark"] .theme-toggle-btn .moon-icon { display: none !important; }
+
+    :root[data-theme="light"] .theme-toggle-btn .sun-icon,
+    [data-theme="light"] .theme-toggle-btn .sun-icon { display: none !important; }
+
+    :root[data-theme="light"] .theme-toggle-btn .moon-icon,
+    [data-theme="light"] .theme-toggle-btn .moon-icon { display: block !important; }
+
+    /* Headings */
+    .error-code {
+      font-family: var(--font-mono);
+      font-size: clamp(48px, 10vw, 72px);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+
+    .error-title {
+      font-family: var(--font-display);
+      font-size: clamp(20px, 4vw, 28px);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.25;
+      margin-bottom: 16px;
+      color: var(--text);
+      text-transform: uppercase;
+    }
+
+    .error-desc {
+      font-size: clamp(14px, 2.2vw, 16px);
+      color: var(--muted);
+      line-height: 1.65;
+      margin-bottom: 36px;
+    }
+
+    /* Actions Grid */
+    .actions-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    @media (min-width: 520px) {
+      .actions-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .actions-grid .btn-primary-full {
+        grid-column: span 2;
+      }
+    }
+
+    .action-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 14px 22px;
+      border-radius: 14px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      text-decoration: none;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: pointer;
+    }
+
+    .btn-primary-full {
+      background: var(--text);
+      color: var(--bg);
+      border: 1px solid var(--text);
+    }
+
+    .btn-primary-full:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(255, 255, 255, 0.15);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--line-strong);
+      background: rgba(255, 255, 255, 0.07);
+      transform: translateY(-2px);
+    }
+
+    /* Footer Meta */
+    .card-footer {
+      border-top: 1px solid var(--line);
+      padding-top: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--dim);
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .card-footer a {
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .card-footer a:hover {
+      color: var(--text);
+    }
+
+    /* Toast Notification */
+    .toast-notice {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(30px);
+      background: var(--text);
+      color: var(--bg);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 10px 22px;
+      border-radius: 999px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 1000;
+    }
+
+    .toast-notice.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="noise-overlay" aria-hidden="true"></div>
+  <div class="ambient-glow" id="ambient-glow" aria-hidden="true"></div>
+  <div class="backdrop-404" aria-hidden="true">404</div>
+
+  <main class="error-card">
+    <div class="card-top-bar">
+      <div class="status-badge">
+        <span class="pulse-dot"></span>
+        <span id="txt-status">// 404 ROUTE NOT FOUND</span>
+      </div>
+      <button type="button" class="theme-toggle-btn" id="theme-btn" aria-label="Змінити тему" title="Dark / Light theme">
+        <svg class="theme-icon-svg moon-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+        <svg class="theme-icon-svg sun-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      </button>
+    </div>
+
+    <div class="error-code">404</div>
+    <h1 class="error-title" id="txt-title">МАРШРУТ НЕ ЗНАЙДЕНО</h1>
+    <p class="error-desc" id="txt-desc">
+      Запитувана адреса відсутня, була переміщена або знаходиться в розробці. Всі активні матеріали, проєкти та прямі контакти доступні в головному портфоліо.
+    </p>
+
+    <div class="actions-grid">
+      <a href="/" class="action-btn btn-primary-full" id="btn-home">
+        <span>← Повернутися на головну</span>
+      </a>
+      <a href="/links" class="action-btn btn-secondary" id="btn-links">
+        <span>Особисті лінки & QR ↗</span>
+      </a>
+      <a href="/us" class="action-btn btn-secondary" id="btn-us">
+        <span>US Executive Resume ↗</span>
+      </a>
+      <a href="https://t.me/mikolazozul" target="_blank" rel="noopener" class="action-btn btn-secondary" id="btn-tg">
+        <span>Telegram @mikolazozul ↗</span>
+      </a>
+      <a href="mailto:mikolazozul@gmail.com" class="action-btn btn-secondary" id="btn-mail">
+        <span>Написати на Email ↗</span>
+      </a>
+    </div>
+
+    <div class="card-footer">
+      <span>MYKOLA ZOZUL // SYSTEM PORTFOLIO</span>
+      <span>100% REMOTE • RELOCATION READY</span>
+    </div>
+  </main>
+
+  <div class="toast-notice" id="toast-notice"></div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      // Audio feedback
+      let audioCtx = null;
+      function playTone(freq = 900) {
+        try {
+          if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          if (audioCtx.state === 'suspended') audioCtx.resume();
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+          gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.05);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.05);
+        } catch(e) {}
+      }
+
+      document.querySelectorAll('.action-btn, .theme-toggle-btn').forEach(btn => {
+        btn.addEventListener('click', () => playTone(950));
+      });
+
+      // Mouse Glow
+      const glow = document.getElementById('ambient-glow');
+      window.addEventListener('mousemove', e => {
+        if (glow) {
+          glow.style.left = e.clientX + 'px';
+          glow.style.top = e.clientY + 'px';
+        }
+      });
+
+      // Theme toggle (Vertex Studio Pattern)
+      function syncThemeIcons(theme) {
+        const isLight = theme === 'light';
+        document.querySelectorAll('.theme-toggle-btn, #theme-btn').forEach(btn => {
+          const sun = btn.querySelector('.sun-icon');
+          const moon = btn.querySelector('.moon-icon');
+          if (sun) sun.style.display = isLight ? 'none' : 'block';
+          if (moon) moon.style.display = isLight ? 'block' : 'none';
+          btn.setAttribute('title', isLight ? 'Темна тема (Dark Mode)' : 'Світла тема (Light Mode)');
+          btn.setAttribute('aria-label', isLight ? 'Увімкнути темну тему' : 'Увімкнути світлу тему');
+        });
+      }
+
+      const themeBtn = document.getElementById('theme-btn');
+      if (themeBtn) {
+        themeBtn.addEventListener('click', () => {
+          const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+          const next = isDark ? 'light' : 'dark';
+          document.documentElement.setAttribute('data-theme', next);
+          localStorage.setItem('mz_theme', next);
+          syncThemeIcons(next);
+        });
+      }
+      const savedTheme = localStorage.getItem('mz_theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      syncThemeIcons(savedTheme);
+
+      // Multilingual dictionary for 404
+      const dict = {
+        uk: {
+          title_page: "404 — Сторінку не знайдено // Route Not Found | Mykola Zozul",
+          status: "// 404 ROUTE NOT FOUND",
+          title: "МАРШРУТ НЕ ЗНАЙДЕНО",
+          desc: "Запитувана адреса відсутня, була переміщена або знаходиться в розробці. Всі активні матеріали, проєкти та прямі контакти доступні в головному портфоліо.",
+          home: "← Повернутися на головну",
+          links: "Особисті лінки & QR ↗",
+          us: "US Executive Resume ↗",
+          tg: "Telegram @mikolazozul ↗",
+          mail: "Написати на Email ↗"
+        },
+        en: {
+          title_page: "404 — Page Not Found // Route Not Found | Mykola Zozul",
+          status: "// 404 ROUTE NOT FOUND",
+          title: "ROUTE NOT FOUND",
+          desc: "The requested route does not exist, has been relocated, or is currently under construction. All official materials, verified projects, and direct lines are available at the base portfolio.",
+          home: "← Return to Base Portfolio",
+          links: "Personal Links & QR ↗",
+          us: "US Executive Resume ↗",
+          tg: "Telegram @mikolazozul ↗",
+          mail: "Send an Email ↗"
+        },
+        de: {
+          title_page: "404 — Seite nicht gefunden // Route Not Found | Mykola Zozul",
+          status: "// 404 ROUTE NOT FOUND",
+          title: "SEITE NICHT GEFUNDEN",
+          desc: "Die angeforderte Route existiert nicht oder wurde verschoben. Alle offiziellen Materialien und direkten Kontakte stehen im Hauptportfolio bereit.",
+          home: "← Zurück zur Startseite",
+          links: "Persönliche Links & QR ↗",
+          us: "US Executive Resume ↗",
+          tg: "Telegram @mikolazozul ↗",
+          mail: "E-Mail senden ↗"
+        },
+        pl: {
+          title_page: "404 — Nie znaleziono strony // Route Not Found | Mykola Zozul",
+          status: "// 404 ROUTE NOT FOUND",
+          title: "STRONA NIE ZNALEZIONA",
+          desc: "Żądany adres nie istnieje lub został przeniesiony. Wszystkie oficjalne materiały, projekty i bezpośrednie kontakty są dostępne w głównym portfolio.",
+          home: "← Wróć do strony głównej",
+          links: "Osobiste linki & QR ↗",
+          us: "US Executive Resume ↗",
+          tg: "Telegram @mikolazozul ↗",
+          mail: "Napisz wiadomość Email ↗"
+        },
+        es: {
+          title_page: "404 — Página no encontrada // Route Not Found | Mykola Zozul",
+          status: "// 404 ROUTE NOT FOUND",
+          title: "RUTA NO ENCONTRADA",
+          desc: "La dirección solicitada no existe o ha sido reubicada. Todos los materiales oficiales, proyectos y canales directos están disponibles en el portafolio principal.",
+          home: "← Volver a la página principal",
+          links: "Enlaces personales & QR ↗",
+          us: "US Executive Resume ↗",
+          tg: "Telegram @mikolazozul ↗",
+          mail: "Enviar un Email ↗"
+        },
+        fr: {
+          title_page: "404 — Page non trouvée // Route Not Found | Mykola Zozul",
+          status: "// 404 ROUTE NOT FOUND",
+          title: "ROUTE NON TROUVÉE",
+          desc: "L'adresse demandée n'existe pas ou a été déplacée. Tous les contenus officiels, projets vérifiés et contacts directs sont accessibles sur le portfolio principal.",
+          home: "← Retour à l'accueil",
+          links: "Liens personnels & QR ↗",
+          us: "US Executive Resume ↗",
+          tg: "Telegram @mikolazozul ↗",
+          mail: "Envoyer un Email ↗"
+        },
+        it: {
+          title_page: "404 — Pagina non trovata // Route Not Found | Mykola Zozul",
+          status: "// 404 ROUTE NOT FOUND",
+          title: "ROTTA NON TROVATA",
+          desc: "L'indirizzo richiesto non esiste, è stato rimosso o è in fase di aggiornamento. Tutti i progetti verificati e i contatti diretti sono disponibili nel portfolio principale.",
+          home: "← Torna alla Home / Portfolio",
+          links: "Link Personali & QR ↗",
+          us: "US Executive Resume ↗",
+          tg: "Telegram @mikolazozul ↗",
+          mail: "Invia un'Email ↗"
+        },
+        pt: {
+          title_page: "404 — Página não encontrada // Route Not Found | Mykola Zozul",
+          status: "// 404 ROUTE NOT FOUND",
+          title: "ROTA NÃO ENCONTRADA",
+          desc: "O endereço solicitado não existe ou foi movido. Todos os materiais oficiais, projetos e canais de contato direto estão disponíveis no portfólio principal.",
+          home: "← Voltar ao Portfólio Base",
+          links: "Links Pessoais & QR ↗",
+          us: "US Executive Resume ↗",
+          tg: "Telegram @mikolazozul ↗",
+          mail: "Enviar um Email ↗"
+        },
+        nl: {
+          title_page: "404 — Pagina niet gevonden // Route Not Found | Mykola Zozul",
+          status: "// 404 ROUTE NOT FOUND",
+          title: "ROUTE NIET GEVONDEN",
+          desc: "Het opgevraagde adres bestaat niet of is verplaatst. Alle officiële materialen, projecten en directe contactlijnen zijn beschikbaar in het hoofdportfolio.",
+          home: "← Terug naar Hoofdportfolio",
+          links: "Persoonlijke Links & QR ↗",
+          us: "US Executive Resume ↗",
+          tg: "Telegram @mikolazozul ↗",
+          mail: "Stuur een E-mail ↗"
+        },
+        tr: {
+          title_page: "404 — Sayfa Bulunamadı // Route Not Found | Mykola Zozul",
+          status: "// 404 ROUTE NOT FOUND",
+          title: "SAYFA BULUNAMADI",
+          desc: "İstediğiniz adres mevcut değil veya taşınmış. Tüm doğrulanmış projeler ve doğrudan iletişim kanalları ana portföyde mevcuttur.",
+          home: "← Ana Portföye Dön",
+          links: "Kişisel Linkler & QR ↗",
+          us: "US Executive Resume ↗",
+          tg: "Telegram @mikolazozul ↗",
+          mail: "E-posta Gönder ↗"
+        },
+        sv: {
+          title_page: "404 — Sidan hittades inte // Route Not Found | Mykola Zozul",
+          status: "// 404 ROUTE NOT FOUND",
+          title: "SIDAN HITTADES INTE",
+          desc: "Den begärda adressen finns inte eller har flyttats. Alla officiella material, verifierade projekt och direktkanaler finns i huvudportföljen.",
+          home: "← Tillbaka till Portföljen",
+          links: "Personliga Länkar & QR ↗",
+          us: "US Executive Resume ↗",
+          tg: "Telegram @mikolazozul ↗",
+          mail: "Skicka ett E-postmeddelande ↗"
+        },
+        ru: {
+          title_page: "404 — Страница не найдена // Route Not Found | Mykola Zozul",
+          status: "// 404 ROUTE NOT FOUND",
+          title: "МАРШРУТ НЕ НАЙДЕН",
+          desc: "Запрашиваемый адрес отсутствует или был перемещен. Все официальные материалы, проекты и прямые контакты доступны в главном портфолио.",
+          home: "← Вернуться на главную",
+          links: "Личные ссылки & QR ↗",
+          us: "US Executive Resume ↗",
+          tg: "Telegram @mikolazozul ↗",
+          mail: "Написать на Email ↗"
+        },
+        la: {
+          title_page: "404 — Pagina Non Inventa // Route Not Found | Mykola Zozul",
+          status: "// 404 VIA NON INVENTA",
+          title: "VIA NON INVENTA",
+          desc: "Iter postulatum non existit, translatum est, vel sub constructione manet. Omnia documenta publica, incepta probata et canales directi in portfolio primario praesto sunt.",
+          home: "← Redi ad Portfolio Primarium",
+          links: "Nexus Personales & QR ↗",
+          us: "US Executive Resume ↗",
+          tg: "Telegram @mikolazozul ↗",
+          mail: "Mitte Epistulam Electronicam ↗"
+        }
+      };
+
+      const supportedLangs = ['uk', 'en', 'de', 'pl', 'es', 'fr', 'it', 'pt', 'nl', 'tr', 'sv', 'la', 'ru'];
+      function detectUserLanguage() {
+        const saved = localStorage.getItem('mz_lang');
+        if (saved && supportedLangs.includes(saved)) return saved;
+        const navLangs = navigator.languages || [navigator.language || ''];
+        for (const raw of navLangs) {
+          if (!raw) continue;
+          const primary = raw.toLowerCase().split('-')[0];
+          if (supportedLangs.includes(primary)) return primary;
+        }
+        return 'uk';
+      }
+
+      const lang = detectUserLanguage();
+      const d = dict[lang] || dict.uk;
+      document.title = d.title_page;
+      document.getElementById('txt-status').textContent = d.status;
+      document.getElementById('txt-title').textContent = d.title;
+      document.getElementById('txt-desc').textContent = d.desc;
+      document.getElementById('btn-home').querySelector('span').textContent = d.home;
+      document.getElementById('btn-links').querySelector('span').textContent = d.links;
+      document.getElementById('btn-us').querySelector('span').textContent = d.us;
+      document.getElementById('btn-tg').querySelector('span').textContent = d.tg;
+      document.getElementById('btn-mail').querySelector('span').textContent = d.mail;
+    })();
+  </script>
+</body>
+</html>
