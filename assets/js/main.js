@@ -59,7 +59,7 @@ function preloader() {
 function clock() {
   const els = $$('[data-clock]');
   if (!els.length) return;
-  const fmt = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Warsaw', hour: '2-digit', minute: '2-digit' });
+  const fmt = new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit' });
   const set = () => { const t = fmt.format(new Date()); els.forEach((e) => (e.textContent = t)); };
   set();
   setInterval(set, 15000);
@@ -283,9 +283,10 @@ function copy() {
         const t = document.createElement('textarea'); t.value = text; document.body.appendChild(t); t.select();
         try { document.execCommand('copy'); } catch (err) {} t.remove();
       }
-      const old = btn.textContent;
-      btn.textContent = 'Copied ✓'; btn.classList.add('is-done');
-      setTimeout(() => { btn.textContent = old; btn.classList.remove('is-done'); }, 1800);
+      const label = $('[data-copy-label]', btn) || btn;
+      const old = label.textContent;
+      label.textContent = btn.dataset.copyDone || 'Copied ✓'; btn.classList.add('is-done');
+      setTimeout(() => { label.textContent = old; btn.classList.remove('is-done'); }, 1800);
     });
   });
 }
@@ -297,7 +298,6 @@ function form() {
     const plan = b.dataset.plan;
     if (plan.startsWith('Full-time')) f.type.value = 'Full-time / contract role';
     if (plan === 'Retainer') f.budget.value = 'Monthly retainer';
-    if (plan === 'Sprint') f.budget.value = '€900 – €2,500';
   }));
   f.addEventListener('submit', (e) => {
     e.preventDefault();

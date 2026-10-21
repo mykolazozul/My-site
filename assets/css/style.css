@@ -985,3 +985,5 @@ html.no-preload .preloader { display: none; }
 }
 
 @media (hover: none) { .case__hint { display: none; } }
+button.channel { width: 100%; text-align: left; border-bottom: 1px solid var(--line); }
+button.channel.is-done span { color: var(--white); }
