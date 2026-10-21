@@ -409,7 +409,8 @@ function scrollScene() {
         heroName.style.transform = `translate3d(${mouse.x * -26}px, calc(-50% + ${y * 0.42 + mouse.y * -10}px), 0)`;
         heroName.style.opacity = String(1 - p * 1.1);
       }
-      if (heroFig) heroFig.style.transform = `translate3d(calc(-58% + ${mouse.x * 18}px), ${y * 0.12 + mouse.y * 6}px, 0) scale(${1 + p * 0.06})`;
+      if (heroFig) heroFig.style.transform = `translate3d(calc(-42% + ${mouse.x * 18}px), ${y * 0.12 + mouse.y * 6}px, 0) scale(${1 + p * 0.06})`;
+      hero.style.setProperty('--hp', easeInOut(p).toFixed(3));
     }
 
     // manifesto: words light up as you read
@@ -466,41 +467,56 @@ function scrollScene() {
 }
 
 /* ---------------------------------------------------------------- hero name fit */
-// Keeps both words clear of the head silhouette on any aspect ratio.
-// 0.404 / 0.864 = left / right edge of the head in the cutout at name height.
+// Keeps both words clear of the silhouette on any aspect ratio: the portrait's alpha
+// is sampled once, then the name shrinks until it no longer touches the figure at its height.
 function fitHeroName() {
   const name = $('[data-hero-name]');
   const fig = $('[data-hero-figure]');
-  if (!name || !fig) return;
+  const hero = $('.hero');
+  const img = fig && $('img', fig);
+  if (!name || !fig || !img) return;
   const words = $$('.hero__word', name);
+  let mask = null;
   const run = () => {
     name.style.fontSize = '';
-    if (window.innerWidth <= 960 || words.length < 2) return;
+    if (window.innerWidth <= 960 || words.length < 2 || !mask) return;
     const W = document.documentElement.clientWidth;
-    const figW = fig.offsetWidth;
-    const figLeft = W / 2 - 0.58 * figW;
-    const headL = figLeft + 0.404 * figW, headR = figLeft + 0.864 * figW;
+    const figW = fig.offsetWidth, figH = fig.offsetHeight;
+    const figLeft = W / 2 - 0.42 * figW, figTop = hero.offsetHeight - figH;   // matches translate(-42%), bottom: 0
     const cs = getComputedStyle(name);
     const size = parseFloat(cs.fontSize);
+    const cy = parseFloat(cs.top);
+    // widest extent of the figure across the rows the name covers
+    let l = Infinity, r = -Infinity;
+    for (let y = cy - size * 0.42; y <= cy + size * 0.42; y += 4) {
+      const my = Math.floor((y - figTop) / figH * mask.h);
+      if (my < 0 || my >= mask.h) continue;
+      for (let mx = 0; mx < mask.w; mx++) if (mask.d[(my * mask.w + mx) * 4 + 3] > 110) { l = Math.min(l, mx); r = Math.max(r, mx); }
+    }
+    if (l === Infinity) return;
+    const headL = figLeft + l / mask.w * figW, headR = figLeft + (r + 1) / mask.w * figW;
     const w1 = words[0].getBoundingClientRect().width, w2 = words[1].getBoundingClientRect().width;
-    const pad = 14;
+    const pad = 18;
     const k = Math.min(1, (headL - pad - parseFloat(cs.paddingLeft)) / w1, (W - parseFloat(cs.paddingRight) - headR - pad) / w2);
-    if (k < 1) name.style.fontSize = `${(size * k).toFixed(1)}px`;
+    if (k < 1) name.style.fontSize = `${(size * Math.max(k, 0.45)).toFixed(1)}px`;
   };
-  run();
+  const sample = () => {
+    const c = document.createElement('canvas'), w = 120, h = Math.round(w * img.naturalHeight / img.naturalWidth);
+    c.width = w; c.height = h;
+    const x = c.getContext('2d'); x.drawImage(img, 0, 0, w, h);
+    try { mask = { w, h, d: x.getImageData(0, 0, w, h).data }; } catch (e) {}
+    run();
+  };
+  if (img.complete && img.naturalWidth) sample(); else img.addEventListener('load', sample, { once: true });
   if (document.fonts) document.fonts.ready.then(run);
   window.addEventListener('resize', run);
 }
 
-/* ---------------------------------------------------------------- 3D terrain */
-function terrain() {
-  const canvas = $('.hero__terrain');
+/* ---------------------------------------------------------------- hero typography backdrop */
+function heroType() {
+  const canvas = $('.hero__type');
   if (!canvas) return;
-  const go = () => import('./terrain.js')
-    .then((m) => m.initTerrain(canvas, { reduced }))
-    .catch(() => {});
-  if ('requestIdleCallback' in window) requestIdleCallback(go, { timeout: 1200 });
-  else setTimeout(go, 300);
+  import('./hero-type.js').then((m) => m.initHeroType(canvas, { reduced })).catch(() => {});
 }
 
 /* ---------------------------------------------------------------- boot */
@@ -517,4 +533,4 @@ copy();
 form();
 fitHeroName();
 scrollScene();
-terrain();
+heroType();
