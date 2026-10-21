@@ -131,15 +131,35 @@ function reveal() {
     targets.forEach((t) => t.classList.add('is-in'));
     return;
   }
+  // A clip-path reveal starts fully clipped, and Chrome then never reports the
+  // element as intersecting — so those are observed through their parent.
+  const proxy = new Map();
   const io = new IntersectionObserver((entries) => {
     entries.forEach((en) => {
       if (!en.isIntersecting) return;
-      en.target.classList.add('is-in');
+      const el = proxy.get(en.target) || en.target;
+      el.classList.add('is-in');
       io.unobserve(en.target);
-      $$('[data-count]', en.target).forEach(countUp);
+      $$('[data-count]', el).forEach(countUp);
     });
   }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
-  targets.forEach((t) => io.observe(t));
+  targets.forEach((t) => {
+    if (t.dataset.reveal === 'clip') {
+      // an unclipped, invisible sentinel sitting exactly over the element
+      const parent = t.parentElement;
+      if (getComputedStyle(parent).position === 'static') parent.style.position = 'relative';
+      const host = document.createElement('span');
+      host.setAttribute('aria-hidden', 'true');
+      const place = () => {
+        host.style.cssText = `position:absolute;pointer-events:none;visibility:hidden;left:${t.offsetLeft}px;top:${t.offsetTop}px;width:${t.offsetWidth}px;height:${t.offsetHeight}px`;
+      };
+      place();
+      parent.appendChild(host);
+      proxy.set(host, t);
+      io.observe(host);
+      new ResizeObserver(place).observe(parent);
+    } else io.observe(t);
+  });
 }
 
 function countUp(el) {
@@ -212,7 +232,6 @@ function buildMap() {
   HUBS.forEach(([lat, lon, name], i) => {
     const [x, y] = P(lat, lon);
     html += `<circle class="map__ring" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="6" style="animation-delay:${i * 0.5}s"/><circle class="map__hub" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.6"/>`;
-    if (i < 2) html += `<text class="map__label map__label--hub" x="${(x + 9).toFixed(1)}" y="${(y + 4).toFixed(1)}">${name.toUpperCase()}</text>`;
   });
   html += '</g>';
   svg.innerHTML = html;
@@ -225,14 +244,17 @@ function buildMap() {
     p.style.strokeDashoffset = reduced ? 0 : len;
   });
   if (reduced) return;
-  new IntersectionObserver(([en], io) => {
-    if (!en.isIntersecting) return;
-    io.disconnect();
-    paths.forEach((p, i) => {
-      p.style.transition = `stroke-dashoffset 1.8s cubic-bezier(.22,1,.36,1) ${0.3 + i * 0.035}s`;
-      p.style.strokeDashoffset = 0;
-    });
-  }, { threshold: 0.3 }).observe(box);
+  // draw the arcs once the map's clip reveal starts (see reveal())
+  const draw = () => paths.forEach((p, i) => {
+    p.style.transition = `stroke-dashoffset 1.8s cubic-bezier(.22,1,.36,1) ${0.3 + i * 0.035}s`;
+    p.style.strokeDashoffset = 0;
+  });
+  const mo = new MutationObserver(() => {
+    if (!box.classList.contains('is-in')) return;
+    mo.disconnect();
+    draw();
+  });
+  mo.observe(box, { attributes: true, attributeFilter: ['class'] });
 }
 
 /* ---------------------------------------------------------------- slit mountains */
