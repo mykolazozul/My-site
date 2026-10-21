@@ -367,7 +367,6 @@ function scrollScene() {
   const slitText = slit && $('.slit__text', slit);
   const slitSub = slit && $('.slit__sub', slit);
   const walker = slit && $('[data-walker]', slit);
-  const paper = slit && $('.slit__paper', slit);
   const light = $('[data-nav-theme="dark"]');
   const process = $('[data-process]');
   const strips = $$('[data-strips] .strips__s img');
@@ -426,15 +425,13 @@ function scrollScene() {
     if (slit) {
       const r = slit.getBoundingClientRect();
       const p = clamp(-r.top / (r.height - vh));
-      const e = easeInOut(clamp((p - 0.08) / 0.6));
+      // the window is fully open before the light area slides up over the end of the slit
+      const e = easeInOut(clamp((p - 0.06) / 0.56));
       const vw = window.innerWidth;
       slitWin.style.setProperty('--w', `${(0.034 + 0.966 * e) * vw}px`);
       slitText.style.opacity = String(1 - clamp((p - 0.3) / 0.22));
       slitSub.style.opacity = String(1 - clamp((p - 0.2) / 0.2));
       walker.style.setProperty('--s', String(1 + e * 1.6));
-      const po = clamp((p - 0.7) / 0.2);
-      paper.style.setProperty('--paper-o', String(po));
-      if (r.top <= 0 && r.bottom > navH && po > 0.5) darkNav = true;
     }
     if (light) {
       const r = light.getBoundingClientRect();

@@ -596,7 +596,6 @@ html.no-preload .preloader { display: none; }
   transform: translateX(-50%); filter: brightness(0); opacity: .92;
   transform-origin: 50% 100%;
 }
-.slit__paper { position: absolute; inset: 0; background: var(--paper); opacity: var(--paper-o, 0); }
 .slit__text {
   position: absolute; left: 0; right: 0; top: 47%; transform: translateY(-50%);
   text-align: center; z-index: 3; mix-blend-mode: difference; color: #fff;
@@ -609,6 +608,8 @@ html.no-preload .preloader { display: none; }
    Light (inverted) area — Services / Models / Process
    ========================================================================== */
 .is-light { background: var(--paper); color: var(--black); }
+/* slides up over the end of the slit like a turning page, so the landscape hands straight over to content */
+.slit + .is-light { position: relative; z-index: 1; margin-top: -38vh; box-shadow: 0 -40px 80px rgba(0,0,0,.35); }
 .is-light ::selection { background: var(--black); color: var(--paper); }
 .is-light .mute { color: rgba(5,5,5,.58); }
 
