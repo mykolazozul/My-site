@@ -35,6 +35,144 @@
   font-display: swap;
 }
 
+/* Cyrillic: the families above have none, so the Ukrainian version uses close cousins (loaded only when used) */
+@font-face {
+  font-family: "Cormorant Garamond";
+  src: url("../fonts/cormorant-garamond-500i-cyrillic.woff2") format("woff2");
+  font-weight: 500;
+  font-style: italic;
+  font-display: swap;
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: "Cormorant Garamond";
+  src: url("../fonts/cormorant-garamond-500i-latin.woff2") format("woff2");
+  font-weight: 500;
+  font-style: italic;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Cormorant Garamond";
+  src: url("../fonts/cormorant-garamond-500-cyrillic.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: "Cormorant Garamond";
+  src: url("../fonts/cormorant-garamond-500-latin.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Fira Sans";
+  src: url("../fonts/fira-sans-400-cyrillic.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: "Fira Sans";
+  src: url("../fonts/fira-sans-400-latin.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Fira Sans";
+  src: url("../fonts/fira-sans-500-cyrillic.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: "Fira Sans";
+  src: url("../fonts/fira-sans-500-latin.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Fira Sans";
+  src: url("../fonts/fira-sans-600-cyrillic.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: "Fira Sans";
+  src: url("../fonts/fira-sans-600-latin.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Fira Sans Extra Condensed";
+  src: url("../fonts/fira-sans-extra-condensed-500-cyrillic.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: "Fira Sans Extra Condensed";
+  src: url("../fonts/fira-sans-extra-condensed-500-latin.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Fira Sans Extra Condensed";
+  src: url("../fonts/fira-sans-extra-condensed-600-cyrillic.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: "Fira Sans Extra Condensed";
+  src: url("../fonts/fira-sans-extra-condensed-600-latin.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Fira Sans Extra Condensed";
+  src: url("../fonts/fira-sans-extra-condensed-800-cyrillic.woff2") format("woff2");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: "Fira Sans Extra Condensed";
+  src: url("../fonts/fira-sans-extra-condensed-800-latin.woff2") format("woff2");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("../fonts/jetbrains-mono-100-800-cyrillic.woff2") format("woff2");
+  font-weight: 100 800;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
 :root {
   --black: #050505;
   --ink: #0c0c0c;
@@ -42,7 +180,7 @@
   --white: #efeeea;
   --paper: #e9e7e2;
   --mute: rgba(239, 238, 234, 0.56);
-  --faint: rgba(239, 238, 234, 0.32);
+  --faint: rgba(239, 238, 234, 0.44);
   --line: rgba(239, 238, 234, 0.13);
   --line-strong: rgba(239, 238, 234, 0.28);
   --signal: #ff2b1c;
@@ -58,6 +196,13 @@
   --ease-in-out: cubic-bezier(0.76, 0, 0.24, 1);
   --nav-h: 76px;
 }
+
+html[lang="uk"] {
+  --display: "Fira Sans Extra Condensed", "Arial Narrow", system-ui, sans-serif;
+  --sans: "Fira Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --serif: "Cormorant Garamond", Georgia, serif;
+}
+html.i18n-pending body { visibility: hidden; }
 
 /* ---------- reset ---------- */
 *, *::before, *::after { box-sizing: border-box; }
@@ -506,11 +651,6 @@ html.no-preload .preloader { display: none; }
   background: rgba(5,5,5,.72); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
   border: 1px solid var(--line); border-radius: 999px; padding: 9px 14px;
 }
-.case__hint {
-  position: absolute; right: 18px; bottom: 16px; z-index: 2; color: rgba(255,255,255,.7);
-  transition: opacity .5s ease;
-}
-.case__media:hover .case__hint { opacity: 0; }
 .case__index { color: var(--mute); display: flex; justify-content: space-between; margin-bottom: 28px; }
 .case__title {
   font: 800 clamp(48px, 6.4vw, 120px)/.84 var(--display); font-stretch: 62%;
@@ -561,7 +701,7 @@ html.no-preload .preloader { display: none; }
 /* ==========================================================================
    Slit interlude — "STAY HUNGRY."
    ========================================================================== */
-.slit { position: relative; height: 230vh; background: var(--black); }
+.slit { position: relative; height: 190vh; background: var(--black); }
 .slit__stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; }
 .slit__walls {
   position: absolute; inset: 0;
@@ -609,7 +749,7 @@ html.no-preload .preloader { display: none; }
    ========================================================================== */
 .is-light { background: var(--paper); color: var(--black); }
 /* slides up over the end of the slit like a turning page, so the landscape hands straight over to content */
-.slit + .is-light { position: relative; z-index: 1; margin-top: -38vh; box-shadow: 0 -40px 80px rgba(0,0,0,.35); }
+.slit + .is-light { position: relative; z-index: 1; margin-top: -30vh; box-shadow: 0 -40px 80px rgba(0,0,0,.35); }
 .is-light ::selection { background: var(--black); color: var(--paper); }
 .is-light .mute { color: rgba(5,5,5,.58); }
 
@@ -754,7 +894,7 @@ html.no-preload .preloader { display: none; }
 /* ==========================================================================
    Why — working with US & EU teams
    ========================================================================== */
-.why { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
+.why { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
 .why__cell {
   position: relative; padding: clamp(24px, 2.6vw, 40px); border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
   min-height: 260px; display: flex; flex-direction: column; overflow: hidden;
@@ -938,7 +1078,6 @@ html.no-preload .preloader { display: none; }
   .marquee__track { animation: none; }
 }
 
-@media (hover: none) { .case__hint { display: none; } }
 button.channel { width: 100%; text-align: left; border-bottom: 1px solid var(--line); }
 button.channel.is-done span { color: var(--white); }
 
@@ -959,7 +1098,7 @@ button.channel.is-done span { color: var(--white); }
   .contact__grid { margin-top: 56px; }
   .footer { padding-top: 72px; }
   .footer__giant { margin-top: 48px; }
-  .slit { height: 210vh; }
+  .slit { height: 170vh; }
 }
 @media (max-width: 640px) {
   .section { padding-block: 64px; }
@@ -991,51 +1130,28 @@ button.channel.is-done span { color: var(--white); }
   .case--map .case__text { margin-top: 20px; }
 }
 
-/* more work — one unified block of cards */
-.more { margin-top: clamp(48px, 6vw, 96px); padding-top: clamp(28px, 3vw, 44px); border-top: 1px solid var(--line); }
-.more__head { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; margin-bottom: clamp(24px, 3vw, 40px); }
-.more__head .sh__label { margin-bottom: 0; }
-.more__lead { font-size: clamp(20px, 1.9vw, 30px); line-height: 1.2; letter-spacing: -.015em; max-width: 560px; text-align: right; }
-.more__lead .serif { font-size: 1.08em; color: var(--mute); }
-.more__grid {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
-  background: var(--line); border: 1px solid var(--line); border-radius: 6px; overflow: hidden;
-}
-.more__card {
-  position: relative; isolation: isolate; overflow: hidden;
-  display: flex; flex-direction: column; min-height: 340px;
-  padding: clamp(22px, 2.4vw, 36px); background: var(--black);
-  transition: color .5s var(--ease);
-}
-.more__card::before {
-  content: ""; position: absolute; inset: 0; z-index: -1; background: var(--white);
-  transform: translateY(101%); transition: transform .7s var(--ease);
-}
-.more__card::after {
-  content: ""; position: absolute; right: -40px; top: -40px; width: 140px; height: 140px; z-index: -1;
-  background-image: repeating-linear-gradient(-45deg, currentColor 0 1.5px, transparent 1.5px 9px);
-  opacity: .07; transition: opacity .5s ease;
-}
-.more__top { display: flex; justify-content: space-between; color: var(--faint); transition: color .5s ease; }
-.more__title { margin-top: clamp(40px, 5vw, 72px); font: 800 clamp(32px, 3vw, 52px)/.88 var(--display); font-stretch: 62%; text-transform: uppercase; letter-spacing: -.005em; }
-.more__role { margin-top: 12px; font: italic 400 clamp(18px, 1.5vw, 22px)/1.2 var(--serif); color: var(--mute); transition: color .5s ease; }
-.more__desc { margin-top: 16px; font-size: 15px; color: var(--mute); max-width: 380px; transition: color .5s ease; }
-.more__tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; padding-top: 26px; }
-.more__tags li { font-size: 10.5px; padding: 7px 11px; border: 1px solid var(--line-strong); border-radius: 999px; color: var(--mute); transition: color .5s ease, border-color .5s ease; }
-.more__card:hover { color: var(--black); }
-.more__card:hover::before { transform: none; }
-.more__card:hover::after { opacity: .14; }
-.more__card:hover .more__top, .more__card:hover .more__role, .more__card:hover .more__desc, .more__card:hover .more__tags li { color: rgba(5,5,5,.62); }
-.more__card:hover .more__tags li { border-color: rgba(5,5,5,.22); }
-@media (max-width: 960px) {
-  .more__head { flex-direction: column; align-items: flex-start; }
-  .more__lead { text-align: left; }
-  .more__grid { grid-template-columns: 1fr; }
-  .more__card { min-height: 0; }
-  .more__title { margin-top: 28px; }
-}
 @media (max-width: 960px) {
   .tri { margin-bottom: 64px; }
   .tri__caption { bottom: -58px; max-width: none; }
   .tri__caption br:first-child { display: none; }
 }
+
+/* EN / UA switch */
+.lang {
+  display: inline-flex; align-items: center; gap: 2px; padding: 4px; border-radius: 999px;
+  border: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+  font: 500 10.5px/1 var(--mono); letter-spacing: .08em;
+}
+.lang span { padding: 6px 8px; border-radius: 999px; opacity: .5; transition: background .3s ease, color .3s ease, opacity .3s ease; }
+.lang span.is-on { opacity: 1; background: currentColor; }
+.lang span.is-on { color: var(--black); background: var(--white); }
+.nav.is-dark .lang span.is-on { color: var(--paper); background: var(--black); }
+.lang:hover span:not(.is-on) { opacity: .85; }
+.lang--menu { margin-left: auto; }
+.lk__right, .nf__right { display: inline-flex; align-items: center; gap: 14px; }
+
+/* Ukrainian: room for the breve of Й in clipped headings, a wider word in the footer, shorter spacing */
+html[lang="uk"] .line-mask { padding-top: .12em; margin-top: -.12em; }
+html[lang="uk"] .footer__giant { font-size: 30vw; }
+html[lang="uk"] .slit__text .spaced { letter-spacing: .4em; margin-right: -.4em; }
+@media (max-width: 640px) { html[lang="uk"] .slit__text .spaced { letter-spacing: .22em; margin-right: -.22em; } }

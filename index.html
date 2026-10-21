@@ -31,6 +31,16 @@
         imagesrcset="/assets/img/hero-suit-sm.webp 560w, /assets/img/hero-suit.webp 744w" imagesizes="(max-width: 960px) 44vh, 60vh">
   <link rel="stylesheet" href="/assets/css/style.css">
   <script>
+    (function () {
+      try {
+        var q = new URLSearchParams(location.search).get('lang');
+        if (q === 'uk' || q === 'en') localStorage.setItem('mz-lang', q);
+        var l = localStorage.getItem('mz-lang') || ((navigator.languages || [navigator.language]).some(function (x) { return /^uk/i.test(x); }) ? 'uk' : 'en');
+        if (l === 'uk') { var h = document.documentElement; h.lang = 'uk'; h.classList.add('i18n-pending'); setTimeout(function () { h.classList.remove('i18n-pending'); }, 1500); }
+      } catch (e) {}
+    })();
+  </script>
+  <script>
     document.documentElement.classList.add('js');
     try { if (sessionStorage.getItem('mz-seen')) document.documentElement.classList.add('no-preload'); } catch (e) {}
   </script>
@@ -96,6 +106,7 @@
         <a class="link-u" href="/links">Links<sup>↗</sup></a>
       </nav>
       <div class="nav__right">
+        <button class="lang" type="button" data-lang-switch aria-label="Switch language"><span data-l="en">EN</span><span data-l="uk">UA</span></button>
         <a class="status" href="#contact"><span class="dot"></span>Available now</a>
         <button class="burger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="menu"><span></span><span></span></button>
       </div>
@@ -115,6 +126,7 @@
       <a href="mailto:mikolazozul@gmail.com">mikolazozul@gmail.com</a>
       <a href="https://www.linkedin.com/in/mikolazozul/" target="_blank" rel="noopener">LinkedIn ↗</a>
       <span class="mute"><span class="dot"></span>&nbsp; Available now</span>
+      <button class="lang lang--menu" type="button" data-lang-switch aria-label="Switch language"><span data-l="en">EN</span><span data-l="uk">UA</span></button>
     </div>
   </div>
 
@@ -226,7 +238,6 @@
               <img src="/assets/img/work-vertex.webp" width="1376" height="768" alt="Vertex Studio website, UI wireframes and typography system" loading="lazy">
             </div>
             <span class="case__badge mono"><span class="dot"></span>Now building</span>
-            <span class="case__hint mono">Hover — colour</span>
           </a>
           <div class="case__body" data-reveal>
             <div class="case__index mono"><span>01 / 03</span><span>2026 — Now</span></div>
@@ -277,11 +288,10 @@
               <img src="/assets/img/work-englishflow.webp" width="1376" height="768" alt="EnglishFlow dashboard with Notion sync and spaced-repetition flashcards" loading="lazy">
             </div>
             <span class="case__badge mono">Product concept</span>
-            <span class="case__hint mono">Hover — colour</span>
           </div>
           <div class="case__body" data-reveal>
             <div class="case__index mono"><span>03 / 03</span><span>2025</span></div>
-            <h3 class="case__title" id="case-ef">English<br>Flow</h3>
+            <h3 class="case__title" id="case-ef" data-i18n-skip>English<br>Flow</h3>
             <p class="case__kicker">A learning product that turns your Notion vocabulary into a daily habit.</p>
             <p class="case__text">Product concept, UX and interface design for a spaced-repetition hub: Notion database sync, flashcards, streaks and progress tracking — designed so that ten minutes a day feels effortless.</p>
             <dl class="case__meta">
@@ -293,35 +303,6 @@
           </div>
         </article>
 
-        <div class="more">
-          <div class="more__head">
-            <p class="sh__label mono">More work — 2020 → 2024</p>
-            <p class="more__lead">The design work that got me here: <span class="serif">causes, clients and content.</span></p>
-          </div>
-          <div class="more__grid" role="list" aria-label="More work">
-          <article class="more__card" role="listitem" data-reveal>
-            <div class="more__top mono"><span>04</span><span>2023 — 24</span></div>
-            <h3 class="more__title">Shliakh Volontera</h3>
-            <p class="more__role">Volunteer graphic designer</p>
-            <p class="more__desc">Visual communication for a volunteer organisation — campaign graphics and social content, made remotely.</p>
-            <ul class="more__tags mono"><li>Campaigns</li><li>Social media</li></ul>
-          </article>
-          <article class="more__card" role="listitem" data-reveal style="--d:0.08s">
-            <div class="more__top mono"><span>05</span><span>2022 — 24</span></div>
-            <h3 class="more__title">Freelance clients</h3>
-            <p class="more__role">UI/UX &amp; graphic designer</p>
-            <p class="more__desc">Custom interfaces for web and mobile apps, plus logos, presentations and brand graphics for small businesses.</p>
-            <ul class="more__tags mono"><li>Web &amp; mobile UI</li><li>Logos</li><li>Decks</li></ul>
-          </article>
-          <article class="more__card" role="listitem" data-reveal style="--d:0.16s">
-            <div class="more__top mono"><span>06</span><span>2020 — 21</span></div>
-            <h3 class="more__title">Social content</h3>
-            <p class="more__role">Editor &amp; motion designer</p>
-            <p class="more__desc">Video editing, motion design and content for social media channels — and my first website layouts.</p>
-            <ul class="more__tags mono"><li>Premiere Pro</li><li>After Effects</li><li>Web layout</li></ul>
-          </article>
-          </div>
-        </div>
       </div>
     </section>
 
@@ -564,10 +545,8 @@
         <div class="why" data-glow>
           <div class="why__cell" data-reveal><p class="why__k mono"><span>01</span><span>Time zone</span></p><p class="why__big">EU + US</p><p class="why__text">Flexible hours: live overlap with the EU workday and US East Coast mornings; async-first for the West Coast.</p></div>
           <div class="why__cell" data-reveal style="--d:.06s"><p class="why__k mono"><span>02</span><span>Response</span></p><p class="why__big">&lt;24h</p><p class="why__text">A reply within one business day, and weekly progress updates — you never have to chase.</p></div>
-          <div class="why__cell" data-reveal style="--d:.12s"><p class="why__k mono"><span>03</span><span>Languages</span></p><p class="why__big">5</p><p class="why__text">English, Polish, Ukrainian, Russian and German. Comfortable in international teams.</p></div>
-          <div class="why__cell" data-reveal><p class="why__k mono"><span>04</span><span>Hiring</span></p><p class="why__big">Simple</p><p class="why__text">Hire me directly — written agreement, invoice via Wise or PayPal in EUR or USD — or through Upwork / Contra if you prefer platform protection.</p></div>
-          <div class="why__cell" data-reveal style="--d:.06s"><p class="why__k mono"><span>05</span><span>Ownership</span></p><p class="why__big">100%</p><p class="why__text">You own every file, line of code and account. No lock-in, clean handover.</p></div>
-          <div class="why__cell" data-reveal style="--d:.12s"><p class="why__k mono"><span>06</span><span>Distributed</span></p><p class="why__big">10+</p><p class="why__text">Countries in the network I coordinated. I know how to keep remote people aligned.</p></div>
+          <div class="why__cell" data-reveal style="--d:.12s"><p class="why__k mono"><span>03</span><span>Hiring</span></p><p class="why__big">Simple</p><p class="why__text">Hire me directly — written agreement, invoice via Wise or PayPal in EUR or USD — or through Upwork / Contra if you prefer platform protection.</p></div>
+          <div class="why__cell" data-reveal style="--d:.18s"><p class="why__k mono"><span>04</span><span>Ownership</span></p><p class="why__big">100%</p><p class="why__text">You own every file, line of code and account. No lock-in, clean handover.</p></div>
         </div>
       </div>
     </section>
@@ -612,23 +591,23 @@
             <div class="field"><label class="mono" for="f-company">Company</label><input id="f-company" name="company" type="text" autocomplete="organization" placeholder="Optional"></div>
             <div class="field"><label class="mono" for="f-type">I need</label>
               <select id="f-type" name="type">
-                <option>Website / landing page</option>
-                <option>Product UI/UX design</option>
-                <option>Brand identity</option>
-                <option>Motion &amp; video</option>
-                <option>Operations support</option>
-                <option>Full-time / contract role</option>
-                <option>Something else</option>
+                <option value="Website / landing page">Website / landing page</option>
+                <option value="Product UI/UX design">Product UI/UX design</option>
+                <option value="Brand identity">Brand identity</option>
+                <option value="Motion &amp; video">Motion &amp; video</option>
+                <option value="Operations support">Operations support</option>
+                <option value="Full-time / contract role">Full-time / contract role</option>
+                <option value="Something else">Something else</option>
               </select>
             </div>
             <div class="field field--full"><label class="mono" for="f-budget">Budget</label>
               <select id="f-budget" name="budget">
-                <option>Not sure yet</option>
-                <option>Under €1,000</option>
-                <option>€1,000 – €3,000</option>
-                <option>€3,000 – €7,000</option>
-                <option>€7,000+</option>
-                <option>Monthly retainer</option>
+                <option value="Not sure yet">Not sure yet</option>
+                <option value="Under €1,000">Under €1,000</option>
+                <option value="€1,000 – €3,000">€1,000 – €3,000</option>
+                <option value="€3,000 – €7,000">€3,000 – €7,000</option>
+                <option value="€7,000+">€7,000+</option>
+                <option value="Monthly retainer">Monthly retainer</option>
               </select>
             </div>
             <div class="field field--full"><label class="mono" for="f-msg">Project details</label><textarea id="f-msg" name="message" rows="4" placeholder="What are you building, and when do you need it?" required></textarea></div>

@@ -1,4 +1,5 @@
 // Mykola Zozul — portfolio interactions. Vanilla, no dependencies.
+import { t as tr } from './i18n.js';
 
 const root = document.documentElement;
 const $ = (s, el = document) => el.querySelector(s);
@@ -74,7 +75,7 @@ function menu() {
   const toggle = (open) => {
     root.classList.toggle('menu-open', open);
     burger.setAttribute('aria-expanded', String(open));
-    burger.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    burger.setAttribute('aria-label', tr(open ? 'Close menu' : 'Open menu'));
     panel.setAttribute('aria-hidden', String(!open));
     document.body.style.overflow = open ? 'hidden' : '';
   };
@@ -315,7 +316,7 @@ function copy() {
       }
       const label = $('[data-copy-label]', btn) || btn;
       const old = label.textContent;
-      label.textContent = btn.dataset.copyDone || 'Copied ✓'; btn.classList.add('is-done');
+      label.textContent = btn.dataset.copyDone || tr('Copied ✓'); btn.classList.add('is-done');
       setTimeout(() => { label.textContent = old; btn.classList.remove('is-done'); }, 1800);
     });
   });
@@ -351,7 +352,7 @@ function form() {
     ].filter((l, i) => l !== '' || i === 5).join('\n');
     window.location.href = `mailto:mikolazozul@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     const btn = $('button[type="submit"]', f);
-    btn.firstChild.textContent = 'Opening your email… ';
+    btn.firstChild.textContent = `${tr('Opening your email…')} `;
   });
 }
 
@@ -426,11 +427,11 @@ function scrollScene() {
       const r = slit.getBoundingClientRect();
       const p = clamp(-r.top / (r.height - vh));
       // the window is fully open before the light area slides up over the end of the slit
-      const e = easeInOut(clamp((p - 0.06) / 0.56));
+      const e = easeInOut(clamp((p - 0.04) / 0.46));
       const vw = window.innerWidth;
       slitWin.style.setProperty('--w', `${(0.034 + 0.966 * e) * vw}px`);
-      slitText.style.opacity = String(1 - clamp((p - 0.3) / 0.22));
-      slitSub.style.opacity = String(1 - clamp((p - 0.2) / 0.2));
+      slitText.style.opacity = String(1 - clamp((p - 0.2) / 0.2));
+      slitSub.style.opacity = String(1 - clamp((p - 0.12) / 0.18));
       walker.style.setProperty('--s', String(1 + e * 1.6));
     }
     if (light) {

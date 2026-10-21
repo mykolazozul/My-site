@@ -2,7 +2,8 @@
 // Rushes in on load, follows the speed and direction of the scroll, tilts away as the hero leaves,
 // and a sweep of light runs across the words on load and whenever you come back to the top.
 
-const WORDS = ['DESIGN', 'STRATEGY', 'BRAND', 'PRODUCT', 'GROWTH'];
+let WORDS = ['DESIGN', 'STRATEGY', 'BRAND', 'PRODUCT', 'GROWTH'];
+let FONT = 'Archivo, sans-serif';
 const SEP = '  ·  ';
 const ANGLE = -0.13;
 
@@ -11,7 +12,7 @@ const lerp = (a, b, t) => a + (b - a) * t;
 const easeOut = (t) => 1 - Math.pow(1 - t, 3);
 const easeOutExpo = (t) => (t >= 1 ? 1 : 1 - Math.pow(2, -10 * t));
 const offscreen = (w, h) => { const c = document.createElement('canvas'); c.width = Math.max(1, w); c.height = Math.max(1, h); return c; };
-const setFont = (ctx, px) => { ctx.font = `800 ${px}px Archivo, sans-serif`; try { ctx.fontStretch = 'extra-condensed'; } catch (e) {} };
+const setFont = (ctx, px) => { ctx.font = `800 ${px}px ${FONT}`; try { ctx.fontStretch = 'extra-condensed'; } catch (e) {} };
 const rowText = (r) => WORDS.map((_, k) => WORDS[(r * 2 + k) % WORDS.length] + SEP).join('');
 
 // a strip holding the row text twice plus the band length, so it can scroll seamlessly
@@ -28,6 +29,8 @@ function strip(text, px, extra, style) {
 
 export function initHeroType(canvas, { reduced = false } = {}) {
   const hero = canvas.closest('.hero') || canvas.parentElement;
+  if (canvas.dataset.words) WORDS = canvas.dataset.words.split(',');
+  FONT = getComputedStyle(document.documentElement).getPropertyValue('--display').trim() || FONT;
   const ctx = canvas.getContext('2d');
   const DPR = Math.min(window.devicePixelRatio || 1, 1.75);
   let W = 1, H = 1, D = 1, rows = [], lit = null, ready = false;

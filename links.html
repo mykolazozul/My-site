@@ -17,6 +17,16 @@
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="preload" href="/assets/fonts/archivo-var.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/assets/css/style.css">
+  <script>
+    (function () {
+      try {
+        var q = new URLSearchParams(location.search).get('lang');
+        if (q === 'uk' || q === 'en') localStorage.setItem('mz-lang', q);
+        var l = localStorage.getItem('mz-lang') || ((navigator.languages || [navigator.language]).some(function (x) { return /^uk/i.test(x); }) ? 'uk' : 'en');
+        if (l === 'uk') { var h = document.documentElement; h.lang = 'uk'; h.classList.add('i18n-pending'); setTimeout(function () { h.classList.remove('i18n-pending'); }, 1500); }
+      } catch (e) {}
+    })();
+  </script>
   <style>
     .lk { position: relative; min-height: 100vh; min-height: 100svh; padding: 28px var(--gutter) 40px; overflow: hidden; isolation: isolate; }
     .lk::before { content: ""; position: absolute; left: 50%; top: -10%; bottom: -10%; width: 280px; margin-left: -140px; z-index: -1;
@@ -73,7 +83,7 @@
     <div class="lk__col">
       <div class="lk__top">
         <a class="logo" href="/"><span class="logo__mark"><span>MZ</span></span></a>
-        <span class="mono mute">Your time — <span data-clock>--:--</span></span>
+        <span class="lk__right"><span class="mono mute">Your time — <span data-clock>--:--</span></span><button class="lang" type="button" data-lang-switch aria-label="Switch language"><span data-l="en">EN</span><span data-l="uk">UA</span></button></span>
       </div>
 
       <div class="lk__strips" aria-hidden="true">
@@ -109,10 +119,12 @@
     </div>
   </main>
 
+  <script type="module" src="/assets/js/i18n.js"></script>
   <script src="/assets/vendor/qrcode.js" defer></script>
   <script>
     (function () {
       var URL_ = location.origin + '/links';
+      var T = function (s) { return window.mzT ? window.mzT(s) : s; };
       document.querySelector('[data-qr-url]').textContent = location.host + '/links';
       var fmt = new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit' });
       var tick = function () { document.querySelectorAll('[data-clock]').forEach(function (e) { e.textContent = fmt.format(new Date()); }); };
@@ -126,19 +138,19 @@
         var a = document.createElement('a');
         a.href = URL.createObjectURL(new Blob([v], { type: 'text/vcard' }));
         a.download = 'Mykola-Zozul.vcf'; document.body.appendChild(a); a.click(); a.remove();
-        flash(e.currentTarget, 'Saved ✓');
+        flash(e.currentTarget, T('Saved ✓'));
       });
 
       document.querySelector('[data-wa]').addEventListener('click', function () {
         var sub = document.querySelector('[data-wa-sub]'), old = sub.textContent;
-        (navigator.clipboard ? navigator.clipboard.writeText('mikolazozul') : Promise.reject()).then(function () { sub.textContent = 'Username copied ✓ — paste it in WhatsApp search'; }, function () { sub.textContent = 'Search @mikolazozul in WhatsApp'; });
+        (navigator.clipboard ? navigator.clipboard.writeText('mikolazozul') : Promise.reject()).then(function () { sub.textContent = T('Username copied ✓ — paste it in WhatsApp search'); }, function () { sub.textContent = T('Search @mikolazozul in WhatsApp'); });
         setTimeout(function () { sub.textContent = old; }, 2600);
       });
 
       document.querySelector('[data-share]').addEventListener('click', function (e) {
         var b = e.currentTarget;
-        if (navigator.share) { navigator.share({ title: 'Mykola Zozul', text: 'Product designer & operator', url: URL_ }).catch(function () {}); return; }
-        (navigator.clipboard ? navigator.clipboard.writeText(URL_) : Promise.reject()).then(function () { flash(b, 'Link copied ✓'); }, function () { flash(b, URL_); });
+        if (navigator.share) { navigator.share({ title: T('Mykola Zozul'), text: T('Product designer & operator'), url: URL_ }).catch(function () {}); return; }
+        (navigator.clipboard ? navigator.clipboard.writeText(URL_) : Promise.reject()).then(function () { flash(b, T('Link copied ✓')); }, function () { flash(b, URL_); });
       });
 
       document.querySelector('[data-qr]').addEventListener('click', function () {
