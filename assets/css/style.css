@@ -711,7 +711,9 @@ html.no-preload .preloader { display: none; }
   clip-path: polygon(0% 6%, 100% 6%, 50% 100%);
   overflow: hidden;
 }
-.tri__photo img { width: 100%; height: 118%; object-fit: cover; object-position: 50% 0%; transform: translateY(var(--py, 0px)) scale(1.34); transform-origin: 50% 0; }
+.tri__photo img { width: 100%; height: 118%; object-fit: cover; object-position: 50% 8%; transform: translateY(var(--py, 0px)); }
+.tri__credit { display: inline-block; margin-top: 10px; font-size: 10px; }
+.tri__credit:hover { color: var(--white); }
 .tri svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .tri svg polygon { fill: none; stroke: var(--white); stroke-width: 1.4; vector-effect: non-scaling-stroke; }
 .tri__caption { position: absolute; left: 0; bottom: 4%; color: var(--mute); max-width: 180px; }
@@ -1047,4 +1049,9 @@ button.channel.is-done span { color: var(--white); }
   .more__grid { grid-template-columns: 1fr; }
   .more__card { min-height: 0; }
   .more__title { margin-top: 28px; }
+}
+@media (max-width: 960px) {
+  .tri { margin-bottom: 64px; }
+  .tri__caption { bottom: -58px; max-width: none; }
+  .tri__caption br:first-child { display: none; }
 }
