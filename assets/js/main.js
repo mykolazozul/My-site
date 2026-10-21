@@ -202,32 +202,40 @@ const CITIES = [
   [41.9, 12.5], [40.42, -3.7], [41.39, 2.17], [38.72, -9.14], [53.35, -6.26], [51.51, -0.13], [44.43, 26.1], [47.01, 28.86],
   [46.06, 14.51], [45.81, 15.98], [42.7, 23.32], [57.71, 11.97],
 ];
+// largest US cities in the network
+const US_CITIES = [
+  [40.71, -74.01], [34.05, -118.24], [41.88, -87.63], [29.76, -95.37], [33.45, -112.07], [39.95, -75.17], [29.42, -98.49],
+  [32.72, -117.16], [32.78, -96.8], [37.77, -122.42], [47.61, -122.33], [38.91, -77.04], [42.36, -71.06], [25.9, -80.19],
+];
 const HUBS = [[49.84, 24.03, 'Lviv'], [50.45, 30.52, 'Kyiv'], [49.99, 36.23, 'Kharkiv'], [46.48, 30.72, 'Odesa'], [48.46, 35.05, 'Dnipro']];
-const LABELS = [[52.23, 21.01, 'PL'], [52.52, 13.4, 'DE'], [50.08, 14.44, 'CZ'], [48.21, 16.37, 'AT'], [54.69, 25.28, 'LT'], [52.37, 4.9, 'NL'], [50.85, 4.35, 'BE'], [48.86, 2.35, 'FR'], [41.9, 12.5, 'IT'], [40.42, -3.7, 'ES'], [59.33, 18.07, 'SE'], [55.68, 12.57, 'DK'], [47.5, 19.04, 'HU'], [48.15, 17.11, 'SK']];
+const LABELS = [[52.23, 21.01, 'PL'], [52.52, 13.4, 'DE'], [50.08, 14.44, 'CZ'], [48.21, 16.37, 'AT'], [54.69, 25.28, 'LT'], [52.37, 4.9, 'NL'], [50.85, 4.35, 'BE'], [48.86, 2.35, 'FR'], [41.9, 12.5, 'IT'], [40.42, -3.7, 'ES'], [59.33, 18.07, 'SE'], [55.68, 12.57, 'DK'], [47.5, 19.04, 'HU'], [48.15, 17.11, 'SK'], [40.71, -74.01, 'NYC'], [34.05, -118.24, 'LA'], [41.88, -87.63, 'CHI'], [29.76, -95.37, 'HOU'], [38.6, -100, 'USA']];
 
 function buildMap() {
   const box = $('[data-map]');
   if (!box) return;
-  const W = 800, H = 550, NS = 'http://www.w3.org/2000/svg';
-  const lon0 = -11, lat1 = 61, k = 23.6, cosL = Math.cos(48 * Math.PI / 180);
-  const P = (lat, lon) => [(lon - lon0) * cosL * k, (lat1 - lat) * k + 6];
+  // Panorama North America → Europe. Must match the projection in map-outline.svg.
+  const W = 1600, H = 560, NS = 'http://www.w3.org/2000/svg';
+  const lon0 = -128, lat1 = 68, k = 13, cosL = Math.cos(45 * Math.PI / 180);
+  const P = (lat, lon) => [(lon - lon0) * cosL * k, (lat1 - lat) * k];
   const svg = document.createElementNS(NS, 'svg');
   svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
-  svg.setAttribute('preserveAspectRatio', 'xMidYMid slice');
+  // on narrow screens keep the right side (US East Coast → Europe) in frame
+  svg.setAttribute('preserveAspectRatio', 'xMaxYMid slice');
   svg.setAttribute('aria-hidden', 'true');
   let html = '<g class="map__grid">';
-  for (let y = 10; y < H; y += 18) for (let x = 10; x < W; x += 18) html += `<circle cx="${x}" cy="${y}" r=".9"/>`;
-  html += '</g><g class="map__arcs">';
+  for (let y = 12; y < H; y += 22) for (let x = 12; x < W; x += 22) html += `<circle cx="${x}" cy="${y}" r="1"/>`;
+  html += `</g><image class="map__land" href="/assets/img/map-outline.svg" x="0" y="0" width="${W}" height="${H}" preserveAspectRatio="none"/><g class="map__arcs">`;
+  const all = [...CITIES, ...US_CITIES];
   const arcs = [];
-  CITIES.forEach(([lat, lon], i) => {
+  all.forEach(([lat, lon], i) => {
     const [x, y] = P(lat, lon);
-    const hub = HUBS[lon < 18 ? (i % 3 === 0 ? 1 : 0) : (i % 4) + (i % 4 === 0 ? 0 : 1)] || HUBS[0];
+    const hub = lon < -30 ? HUBS[i % 2] : HUBS[lon < 18 ? (i % 3 === 0 ? 1 : 0) : (i % 4) + (i % 4 === 0 ? 0 : 1)] || HUBS[0];
     const [hx, hy] = P(hub[0], hub[1]);
-    const mx = (x + hx) / 2, my = (y + hy) / 2 - Math.hypot(hx - x, hy - y) * 0.28;
-    arcs.push(`<path class="map__arc" d="M${x.toFixed(1)} ${y.toFixed(1)} Q${mx.toFixed(1)} ${my.toFixed(1)} ${hx.toFixed(1)} ${hy.toFixed(1)}"/>`);
+    const mx = (x + hx) / 2, my = Math.max(8, (y + hy) / 2 - Math.hypot(hx - x, hy - y) * (lon < -30 ? 0.22 : 0.28));
+    arcs.push(`<path class="map__arc${lon < -30 ? ' map__arc--far' : ''}" d="M${x.toFixed(1)} ${y.toFixed(1)} Q${mx.toFixed(1)} ${my.toFixed(1)} ${hx.toFixed(1)} ${hy.toFixed(1)}"/>`);
   });
   html += arcs.join('') + '</g><g>';
-  CITIES.forEach(([lat, lon]) => { const [x, y] = P(lat, lon); html += `<circle class="map__city" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2.1"/>`; });
+  all.forEach(([lat, lon]) => { const [x, y] = P(lat, lon); html += `<circle class="map__city" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2.6"/>`; });
   LABELS.forEach(([lat, lon, t]) => { const [x, y] = P(lat, lon); html += `<text class="map__label" x="${(x + 6).toFixed(1)}" y="${(y - 5).toFixed(1)}">${t}</text>`; });
   HUBS.forEach(([lat, lon, name], i) => {
     const [x, y] = P(lat, lon);

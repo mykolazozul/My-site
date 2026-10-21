@@ -561,7 +561,8 @@ html.no-preload .preloader { display: none; }
 .map__ring { fill: none; stroke: var(--white); stroke-width: 1; opacity: .5; transform-box: fill-box; transform-origin: center; animation: ring 2.8s var(--ease) infinite; }
 @keyframes ring { 0% { transform: scale(.6); opacity: .8; } 100% { transform: scale(2.8); opacity: 0; } }
 .map__arc { fill: none; stroke: rgba(255,255,255,.38); stroke-width: .8; }
-.map__label { fill: rgba(255,255,255,.42); font: 500 8.5px var(--mono); letter-spacing: .12em; }
+.map__label { fill: rgba(255,255,255,.45); font: 500 11px var(--mono); letter-spacing: .12em; }
+.map__arc--far { stroke: rgba(255,255,255,.26); }
 .map__label--hub { fill: var(--white); font-size: 10px; }
 .map__legend {
   position: absolute; left: 16px; bottom: 14px; right: 16px;
@@ -1019,4 +1020,19 @@ button.channel.is-done span { color: var(--white); }
   .xp__item { padding-block: 22px; }
   .contact__grid { margin-top: 44px; }
   .footer { padding-top: 56px; }
+}
+
+/* panoramic map case (North America → Europe) */
+.case--map { grid-template-columns: 1fr; align-items: start; }
+.case--map .map { aspect-ratio: 1600 / 560; }
+.case--map .case__body { display: grid; grid-template-columns: 1fr 1.15fr; column-gap: clamp(28px, 4vw, 72px); align-items: start; }
+.case--map .case__index { grid-column: 1 / -1; }
+.case--map .case__text { margin-top: 0; }
+@media (max-width: 960px) {
+  .case--map .map { aspect-ratio: 2.15 / 1; }
+  .case--map .map__stamp { display: none; }
+  .case--map .map__legend { left: 10px; right: 10px; bottom: 7px; flex-direction: row; font-size: 9px; }
+  .case--map .map__legend span:first-child { display: none; }
+  .case--map .case__body { grid-template-columns: 1fr; }
+  .case--map .case__text { margin-top: 20px; }
 }
