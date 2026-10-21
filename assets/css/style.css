@@ -723,7 +723,7 @@ html.no-preload .preloader { display: none; }
 .strips__s img {
   position: absolute; top: -12%; height: 124%; max-width: none;
   width: calc(400% + 30px); left: calc(var(--i) * (-100% - 10px));
-  object-fit: cover; object-position: 50% 30%;
+  object-fit: cover; object-position: 50% 62%;
   transform: translateY(var(--ty, 0px));
 }
 .strips-cap { display: flex; justify-content: space-between; gap: 16px; margin-top: 18px; color: var(--mute); }
