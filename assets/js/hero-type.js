@@ -12,14 +12,14 @@ const lerp = (a, b, t) => a + (b - a) * t;
 const easeOut = (t) => 1 - Math.pow(1 - t, 3);
 const easeOutExpo = (t) => (t >= 1 ? 1 : 1 - Math.pow(2, -10 * t));
 const offscreen = (w, h) => { const c = document.createElement('canvas'); c.width = Math.max(1, w); c.height = Math.max(1, h); return c; };
-const setFont = (ctx, px) => { ctx.font = `800 ${px}px ${FONT}`; try { ctx.fontStretch = 'extra-condensed'; } catch (e) {} };
-const rowText = (r) => WORDS.map((_, k) => WORDS[(r * 2 + k) % WORDS.length] + SEP).join('');
+const setFont = (ctx, px, font = FONT) => { ctx.font = `800 ${px}px ${font}`; try { ctx.fontStretch = 'extra-condensed'; } catch (e) {} };
+const rowText = (r, words = WORDS) => words.map((_, k) => words[(r * 2 + k) % words.length] + SEP).join('');
 
 // a strip holding the row text twice plus the band length, so it can scroll seamlessly
-function strip(text, px, extra, style) {
-  const m = offscreen(1, 1).getContext('2d'); setFont(m, px);
+function strip(text, px, extra, style, font = FONT) {
+  const m = offscreen(1, 1).getContext('2d'); setFont(m, px, font);
   const cyc = Math.ceil(m.measureText(text).width), c = offscreen(cyc * 2 + Math.ceil(extra), Math.ceil(px * 1.12));
-  const z = c.getContext('2d'); setFont(z, px);
+  const z = c.getContext('2d'); setFont(z, px, font);
   for (let x = 0; x < c.width; x += cyc) {
     if (style.fill) { z.fillStyle = `rgba(255,255,255,${style.alpha})`; z.fillText(text, x, px * .92); }
     else { z.lineWidth = style.lw; z.strokeStyle = `rgba(255,255,255,${style.alpha})`; z.strokeText(text, x, px * .92); }
@@ -35,27 +35,51 @@ export function initHeroType(canvas, { reduced = false } = {}) {
   const DPR = Math.min(window.devicePixelRatio || 1, 1.75);
   let W = 1, H = 1, D = 1, rows = [], lit = null, ready = false;
 
-  function build() {
+  // drawing the strips is the expensive part (~200 ms), so each language is drawn once, row by row in idle time
+  const cache = new Map();           // words key -> rows (for the current size)
+  let sizeKey = '';
+  const idle = (fn) => ('requestIdleCallback' in window ? requestIdleCallback(fn, { timeout: 500 }) : setTimeout(fn, 30));
+  function makeRow(r, words, font, fs, y) {
+    const solid = r % 3 === 1, text = rowText(r, words);
+    return {
+      ...strip(text, fs, D, solid ? { fill: true, alpha: .08 } : { fill: false, alpha: .17, lw: DPR }, font),
+      lit: strip(text, fs, D, { fill: true, alpha: .8 }, font),
+      y, dir: r % 2 ? 1 : -1, x: r * 157 * DPR,
+    };
+  }
+  function rowsFor(words, font, slow) {
+    const key = words.join(',') + '|' + font;
+    if (cache.has(key)) return Promise.resolve(cache.get(key));
+    const fs = Math.min(H * .17, W * .2), out = [];
+    let y = 0, r = 0;
+    return new Promise((res) => {
+      const step = () => {
+        do { out.push(makeRow(r, words, font, fs, y)); y += fs * .95; r++; } while (!slow && y < D);
+        if (y < D) return idle(step);
+        for (const row of out) row.y -= y / 2;
+        cache.set(key, out); res(out);
+      };
+      step();
+    });
+  }
+  function resize() {
     W = canvas.width = Math.round(canvas.clientWidth * DPR);
     H = canvas.height = Math.round(canvas.clientHeight * DPR);
     D = Math.hypot(W, H) * 1.4;                          // band length: covers the screen while tilting and zooming
-    const fs = Math.min(H * .17, W * .2);
-    const old = rows;
-    rows = [];
-    let y = 0;
-    for (let r = 0; y < D; r++) {
-      const solid = r % 3 === 1;
-      rows.push({
-        ...strip(rowText(r), fs, D, solid ? { fill: true, alpha: .08 } : { fill: false, alpha: .17, lw: DPR }),
-        lit: strip(rowText(r), fs, D, { fill: true, alpha: .8 }),
-        y, dir: r % 2 ? 1 : -1, x: old[r] ? old[r].x : r * 157 * DPR,
-      });
-      y += fs * .95;
-    }
-    for (const r of rows) r.y -= y / 2;
+    const k = W + 'x' + H;
+    if (k !== sizeKey) { cache.clear(); sizeKey = k; }
     lit = offscreen(W, H);
-    ready = true;
   }
+  function use(next) {
+    // keep each row's scroll position so the swap is seamless
+    next.forEach((row, i) => { if (rows[i]) row.x = rows[i].x; });
+    rows = next; ready = true;
+  }
+  async function build() { resize(); use(await rowsFor(WORDS, FONT, false)); prepareOther(); }
+  // the other language waits in the cache, drawn a row at a time when the page is idle
+  let other = null;
+  function prepareOther() { if (other) idle(() => rowsFor(other.words, other.font, true)); }
+  window.addEventListener('mz:prepare', (e) => { other = e.detail; if (ready) prepareOther(); });
 
   // ---- state
   let introAt = null, sweepAt = null, vel = 0, lastY = window.scrollY, last = performance.now(), wentAway = false, visible = true;
@@ -127,8 +151,8 @@ export function initHeroType(canvas, { reduced = false } = {}) {
     ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
   }
 
-  (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => {
-    build();
+  (document.fonts ? document.fonts.ready : Promise.resolve()).then(async () => {
+    await build();
     canvas.classList.add('is-ready');
     const root = document.documentElement;
     if (reduced) { introAt = performance.now() - 1e5; sweepAt = null; frame(performance.now()); return; }
@@ -138,11 +162,12 @@ export function initHeroType(canvas, { reduced = false } = {}) {
     (function loop(t) { frame(t); requestAnimationFrame(loop); })(performance.now());
   });
 
-  // language switch: same motion, new words and typeface
+  // language switch: same motion, new words and typeface — usually straight from the cache
   window.addEventListener('mz:lang', (e) => {
+    other = { words: WORDS, font: FONT };
     WORDS = e.detail.words;
-    FONT = getComputedStyle(document.documentElement).getPropertyValue('--display').trim() || FONT;
-    if (ready) build();
+    FONT = e.detail.font || getComputedStyle(document.documentElement).getPropertyValue('--display').trim() || FONT;
+    if (ready) rowsFor(WORDS, FONT, false).then((next) => { use(next); prepareOther(); });
   });
 
   new IntersectionObserver(([e]) => { visible = e.isIntersecting; }).observe(hero);

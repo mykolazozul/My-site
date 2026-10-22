@@ -399,14 +399,19 @@ export const getLang = () => lang;
 window.mzT = t;
 
 const NAME = { en: ['Mykola', 'Zozul'], uk: ['Микола', 'Зозуль'] };
+const DISPLAY = { en: '"Archivo", "Arial Narrow", system-ui, sans-serif', uk: '"Fira Sans Extra Condensed", "Arial Narrow", system-ui, sans-serif' };
 const BANDS = { en: ['DESIGN', 'STRATEGY', 'BRAND', 'PRODUCT', 'GROWTH'], uk: ['ДИЗАЙН', 'СТРАТЕГІЯ', 'БРЕНД', 'ПРОДУКТ', 'ЗРОСТАННЯ'] };
 const SKIP = 'script, style, svg, .hero__word, [data-giant], [data-i18n-skip], [data-words]';
 
+// regions: top-level blocks; on a switch each one changes language (and typeface) on its own frame,
+// so the page never re-lays out all of its text in one go
+const REGION = '.is-light > *, main > *, body > *';
+const regionOf = (el) => (el && el.closest(REGION)) || document.body;
 // everything translatable is recorded once, in English, so the page can switch both ways in place
 const texts = [], attrs = [];
 (function collect(el) {
   for (const n of el.childNodes) {
-    if (n.nodeType === 3) { const k = norm(n.nodeValue); if (k && TEXT[k] !== undefined) texts.push({ n, k }); }
+    if (n.nodeType === 3) { const k = norm(n.nodeValue); if (k && TEXT[k] !== undefined) texts.push({ n, k, r: regionOf(n.parentElement) }); }
     else if (n.nodeType === 1 && !n.matches(SKIP)) collect(n);
   }
 })(document.body);
@@ -477,22 +482,18 @@ function wordAsText(el, from, to, opts) {
   scramble(el.firstChild, from, to, opts);
 }
 
-function apply(to, animate = false) {
-  lang = to;
-  root.lang = to;
+function applyRegion(reg, to, animate) {
   const uk = to === 'uk';
-  for (const { n, k } of texts) {
+  reg.setAttribute('lang', to);
+  for (const { n, k, r } of texts) {
+    if (r !== reg) continue;
     const v = n.nodeValue, lead = v.match(/^\s*/)[0], trail = v.match(/\s*$/)[0];
     const next = lead + (uk ? TEXT[k] : k) + trail;
     if (animate && n.parentElement && onScreen(n.parentElement)) scramble(n, v, next, { dur: 900 + Math.random() * 500, delay: delayFor(n.parentElement) });
     else n.nodeValue = next;
   }
-  for (const { el, a, en, uk: u } of attrs) el.setAttribute(a, uk ? u : en);
-  document.title = uk ? (ATTR[heads.title] || heads.title) : heads.title;
-  if (meta) meta.content = uk ? (ATTR[heads.desc] || heads.desc) : heads.desc;
-
   // hero name + giant footer word: shuffle as plain text, then rebuild the letter spans
-  const words = document.querySelectorAll('.hero__word');
+  const words = reg.querySelectorAll('.hero__word');
   if (words.length === 2) {
     NAME[to].forEach((w, i) => {
       const el = words[i], start = i ? NAME[to][0].length : 0;
@@ -500,24 +501,12 @@ function apply(to, animate = false) {
       else letters(el, w, start);
     });
   }
-  const giant = document.querySelector('[data-giant]');
+  const giant = reg.querySelector('[data-giant]');
   if (giant) {
     if (animate && onScreen(giant)) wordAsText(giant, giant.textContent, NAME[to][1], { dur: 1500, done: () => letters(giant, NAME[to][1], 0) });
     else letters(giant, NAME[to][1], 0);
   }
-
-  const type = document.querySelector('.hero__type');
-  if (type) type.dataset.bandWords = BANDS[to].join(',');
-  document.querySelectorAll('[data-lang-switch]').forEach((b) => {
-    b.setAttribute('aria-label', uk ? 'Змінити мову' : 'Switch language');
-    b.querySelectorAll('[data-l]').forEach((s) => s.classList.toggle('is-on', s.dataset.l === to));
-  });
-
-  // the manifesto is re-split by main.js on 'mz:lang'; its new words then shuffle in from noise
-  const manifestoOn = animate && manifesto && onScreen(manifesto);
-  if (manifesto) manifesto.innerHTML = manifestoHTML[to];
-  window.dispatchEvent(new CustomEvent('mz:lang', { detail: { lang: to, words: BANDS[to] } }));
-  if (manifestoOn) {
+  if (manifesto && reg.contains(manifesto) && animate && onScreen(manifesto)) {
     const d = delayFor(manifesto);
     manifesto.querySelectorAll('.w').forEach((w, i) => {
       const n = w.firstChild; if (!n) return;
@@ -525,6 +514,37 @@ function apply(to, animate = false) {
       scramble(n, [...target].map(glyphFor).join(''), target, { dur: 700 + Math.random() * 400, delay: d + i * 22 });
     });
   }
+}
+
+// switches the visible regions now and the rest one per frame; resolves when the whole page is done
+function apply(to, animate = false, chunk = animate) {
+  lang = to;
+  const uk = to === 'uk';
+  for (const { el, a, en, uk: u } of attrs) el.setAttribute(a, uk ? u : en);
+  document.title = uk ? (ATTR[heads.title] || heads.title) : heads.title;
+  if (meta) meta.content = uk ? (ATTR[heads.desc] || heads.desc) : heads.desc;
+  const type = document.querySelector('.hero__type');
+  if (type) type.dataset.bandWords = BANDS[to].join(',');
+  document.querySelectorAll('[data-lang-switch]').forEach((b) => {
+    b.setAttribute('aria-label', uk ? 'Змінити мову' : 'Switch language');
+    b.querySelectorAll('[data-l]').forEach((s) => s.classList.toggle('is-on', s.dataset.l === to));
+  });
+  // the manifesto is re-split by main.js on 'mz:lang'
+  if (manifesto) manifesto.innerHTML = manifestoHTML[to];
+  window.dispatchEvent(new CustomEvent('mz:lang', { detail: { lang: to, words: BANDS[to], font: DISPLAY[to] } }));
+
+  const regs = [...new Set([...texts.map((t) => t.r), ...['.hero', '.footer', '[data-words]'].map((q) => regionOf(document.querySelector(q)))].filter(Boolean))];
+  const now = regs.filter((r) => onScreen(r)), later = regs.filter((r) => !now.includes(r));
+  now.forEach((r) => applyRegion(r, to, animate));
+  if (!chunk) { later.forEach((r) => applyRegion(r, to, false)); root.lang = to; return Promise.resolve(); }
+  return new Promise((res) => {
+    const next = () => {
+      const r = later.shift();
+      if (r) { applyRegion(r, to, false); return requestAnimationFrame(next); }
+      root.lang = to; res();
+    };
+    setTimeout(() => requestAnimationFrame(next), 120);
+  });
 }
 
 // load the other language's fonts before the swap
@@ -582,7 +602,7 @@ async function rise(to) {
     { duration: 380, delay: i * 28, easing: EASE_IN, fill: 'forwards' }))));
   await Promise.all(outs.map((a) => a.finished.catch(() => {})));
 
-  apply(to, false);
+  apply(to, false, true);
   window.dispatchEvent(new Event('resize'));
 
   // in: the new text rises from below into place, top of the screen first
@@ -608,7 +628,7 @@ async function switchTo(to) {
   await loadFonts(to);
   const keep = anchor();
   let hold = 1900;
-  if (reduced) { apply(to, false); hold = 0; }
+  if (reduced) { await apply(to, false, true); hold = 0; }
   else if (STYLE === 'rise') hold = await rise(to);
   else apply(to, true);
   window.dispatchEvent(new Event('resize'));
@@ -623,10 +643,20 @@ async function switchTo(to) {
   busy = false;
 }
 
-if (lang === 'uk') apply('uk');
+if (lang === 'uk') apply('uk', false);
 document.querySelectorAll('[data-lang-switch]').forEach((b) => {
   b.querySelectorAll('[data-l]').forEach((s) => s.classList.toggle('is-on', s.dataset.l === lang));
   b.setAttribute('aria-label', lang === 'uk' ? 'Змінити мову' : 'Switch language');
   b.addEventListener('click', () => switchTo(lang === 'uk' ? 'en' : 'uk'));
 });
 root.classList.remove('i18n-pending');
+
+// get the other language ready while the visitor reads: its fonts, and the hero backdrop drawn in it
+(function prepare() {
+  const go = () => {
+    const other = lang === 'uk' ? 'en' : 'uk';
+    loadFonts(other).then(() => window.dispatchEvent(new CustomEvent('mz:prepare', { detail: { words: BANDS[other], font: DISPLAY[other] } })));
+  };
+  const later = () => setTimeout(() => ('requestIdleCallback' in window ? requestIdleCallback(go, { timeout: 3000 }) : go()), 2500);
+  if (document.readyState === 'complete') later(); else window.addEventListener('load', later, { once: true });
+})();

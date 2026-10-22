@@ -197,7 +197,12 @@
   --nav-h: 76px;
 }
 
-html[lang="uk"] {
+[lang="en"] {
+  --display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+  --sans: "Archivo", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --serif: "Instrument Serif", "Times New Roman", serif;
+}
+[lang="uk"] {
   --display: "Fira Sans Extra Condensed", "Arial Narrow", system-ui, sans-serif;
   --sans: "Fira Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --serif: "Cormorant Garamond", Georgia, serif;
@@ -1151,16 +1156,16 @@ button.channel.is-done span { color: var(--white); }
 .lk__right, .nf__right { display: inline-flex; align-items: center; gap: 14px; }
 
 /* Ukrainian: room for the breve of Й in clipped headings, a wider word in the footer, shorter spacing */
-html[lang="uk"] .line-mask { padding-top: .12em; margin-top: -.12em; }
-html[lang="uk"] .footer__giant { font-size: 30vw; }
-html[lang="uk"] .slit__text .spaced { letter-spacing: .4em; margin-right: -.4em; }
-@media (max-width: 640px) { html[lang="uk"] .slit__text .spaced { letter-spacing: .22em; margin-right: -.22em; } }
+.line-mask:lang(uk) { padding-top: .12em; margin-top: -.12em; }
+.footer__giant:lang(uk) { font-size: 30vw; }
+.slit__text .spaced:lang(uk) { letter-spacing: .4em; margin-right: -.4em; }
+@media (max-width: 640px) { .slit__text .spaced:lang(uk) { letter-spacing: .22em; margin-right: -.22em; } }
 
 .lang span { transition: background .35s var(--ease), color .35s var(--ease), opacity .35s ease; }
 
 /* responsive polish (both languages) */
 .nav__links a, .nav .status, .logo__text { white-space: nowrap; }
-@media (max-width: 1180px) { html[lang="uk"] .logo__text { display: none; } }
+@media (max-width: 1180px) { .logo__text:lang(uk) { display: none; } }
 /* portrait tablets: keep the stacked name clear of the head */
 @media (min-width: 641px) and (max-width: 960px) {
   .hero__name { top: 21%; font-size: min(24vw, 17.5vh); }
@@ -1171,3 +1176,7 @@ html[lang="uk"] .slit__text .spaced { letter-spacing: .4em; margin-right: -.4em;
   .hero__top { display: none; }
 }
 @media (max-width: 360px) { .hero__intro .mono { display: none; } }
+
+/* off-screen sections skip layout and paint until they come near the viewport —
+   keeps the language switch (a font change across the whole page) and first load light */
+main > .section:not(.contact), .is-light > .section, .footer { content-visibility: auto; contain-intrinsic-size: auto 1200px; }
