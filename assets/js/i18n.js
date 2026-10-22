@@ -1,6 +1,6 @@
 // Ukrainian version. The HTML is written in English; every translatable text node and attribute is
 // recorded once and swapped from this dictionary — on load (EN / UA switch choice, ?lang=uk or the
-// browser language) and in place, with a soft focus-pull, when the visitor flips the switch.
+// browser language) and in place, with the letters shuffling into the new words, when the visitor flips the switch.
 
 const TEXT = {
   // nav, menu, preloader
@@ -437,33 +437,97 @@ function letters(el, word, start) {
   });
 }
 
-function apply(to, initial = false) {
+/* ---------------------------------------------------------------- scramble: letters shuffle, then settle into the new words */
+const GLYPHS = {
+  upper: 'ABCDEFGHIJKLMNOPQRSTUVWXYZАБВГДЕЄЖЗИІЇКЛМНОПРСТУФХЦЧШЩЮЯ',
+  lower: 'abcdefghijklmnopqrstuvwxyzабвгдеєжзиіїклмнопрстуфхцчшщюя',
+  digit: '0123456789',
+};
+const pick = (s) => s[(Math.random() * s.length) | 0];
+const glyphFor = (c) => (/\s/.test(c) ? c : /\d/.test(c) ? pick(GLYPHS.digit) : c && c === c.toLowerCase() && c !== c.toUpperCase() ? pick(GLYPHS.lower) : pick(GLYPHS.upper));
+const easeInOut = (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
+
+const jobs = new Set();
+let ticking = false;
+function scramble(node, from, to, { dur = 1200, delay = 0, done } = {}) {
+  jobs.add({ node, from, to, dur, delay, t0: performance.now(), done, noise: [], next: 0 });
+  if (!ticking) { ticking = true; requestAnimationFrame(tick); }
+}
+function tick(now) {
+  for (const j of jobs) {
+    const t = (now - j.t0 - j.delay) / j.dur;
+    if (t < 0) continue;
+    if (t >= 1) { j.node.nodeValue = j.to; jobs.delete(j); if (j.done) j.done(); continue; }
+    // the length eases from old to new; letters lock in from left to right; the rest keeps shuffling
+    const len = Math.round(j.from.length + (j.to.length - j.from.length) * Math.min(1, t * 1.6));
+    const locked = Math.floor(easeInOut(Math.max(0, (t - 0.25) / 0.75)) * j.to.length);
+    if (now >= j.next) { j.next = now + 55; for (let i = 0; i < len; i++) j.noise[i] = glyphFor(j.to[i] ?? j.from[i] ?? 'a'); }
+    let s = '';
+    for (let i = 0; i < len; i++) s += i < locked ? j.to[i] : (/\s/.test(j.to[i] ?? j.from[i] ?? 'a') ? ' ' : j.noise[i] || 'a');
+    j.node.nodeValue = s;
+  }
+  if (jobs.size) requestAnimationFrame(tick); else ticking = false;
+}
+const onScreen = (el) => { if (!el) return false; const r = el.getBoundingClientRect(); return r.bottom > -40 && r.top < innerHeight + 40 && r.width > 0; };
+// earlier on the page = starts a touch sooner, so the change reads top-to-bottom
+const delayFor = (el) => Math.max(0, Math.min(420, el.getBoundingClientRect().top / innerHeight * 420));
+
+function wordAsText(el, from, to, opts) {
+  el.textContent = from;
+  scramble(el.firstChild, from, to, opts);
+}
+
+function apply(to, animate = false) {
   lang = to;
   root.lang = to;
   const uk = to === 'uk';
   for (const { n, k } of texts) {
-    const v = n.nodeValue, val = uk ? TEXT[k] : k;
-    n.nodeValue = v.match(/^\s*/)[0] + val + v.match(/\s*$/)[0];
+    const v = n.nodeValue, lead = v.match(/^\s*/)[0], trail = v.match(/\s*$/)[0];
+    const next = lead + (uk ? TEXT[k] : k) + trail;
+    if (animate && n.parentElement && onScreen(n.parentElement)) scramble(n, v, next, { dur: 900 + Math.random() * 500, delay: delayFor(n.parentElement) });
+    else n.nodeValue = next;
   }
   for (const { el, a, en, uk: u } of attrs) el.setAttribute(a, uk ? u : en);
   document.title = uk ? (ATTR[heads.title] || heads.title) : heads.title;
   if (meta) meta.content = uk ? (ATTR[heads.desc] || heads.desc) : heads.desc;
+
+  // hero name + giant footer word: shuffle as plain text, then rebuild the letter spans
   const words = document.querySelectorAll('.hero__word');
-  if (words.length === 2 && !(initial && !uk)) { letters(words[0], NAME[to][0], 0); letters(words[1], NAME[to][1], NAME[to][0].length); }
+  if (words.length === 2) {
+    NAME[to].forEach((w, i) => {
+      const el = words[i], start = i ? NAME[to][0].length : 0;
+      if (animate && onScreen(el)) wordAsText(el, el.textContent, w, { dur: 1500, delay: 80 + i * 120, done: () => { letters(el, w, start); window.dispatchEvent(new Event('resize')); } });
+      else letters(el, w, start);
+    });
+  }
   const giant = document.querySelector('[data-giant]');
-  if (giant && !(initial && !uk)) letters(giant, NAME[to][1], 0);
-  if (manifesto && !initial) manifesto.innerHTML = manifestoHTML[to];
-  else if (manifesto && uk) manifesto.innerHTML = manifestoHTML.uk;
+  if (giant) {
+    if (animate && onScreen(giant)) wordAsText(giant, giant.textContent, NAME[to][1], { dur: 1500, done: () => letters(giant, NAME[to][1], 0) });
+    else letters(giant, NAME[to][1], 0);
+  }
+
   const type = document.querySelector('.hero__type');
   if (type) type.dataset.bandWords = BANDS[to].join(',');
   document.querySelectorAll('[data-lang-switch]').forEach((b) => {
     b.setAttribute('aria-label', uk ? 'Змінити мову' : 'Switch language');
     b.querySelectorAll('[data-l]').forEach((s) => s.classList.toggle('is-on', s.dataset.l === to));
   });
-  if (!initial) window.dispatchEvent(new CustomEvent('mz:lang', { detail: { lang: to, words: BANDS[to] } }));
+
+  // the manifesto is re-split by main.js on 'mz:lang'; its new words then shuffle in from noise
+  const manifestoOn = animate && manifesto && onScreen(manifesto);
+  if (manifesto) manifesto.innerHTML = manifestoHTML[to];
+  window.dispatchEvent(new CustomEvent('mz:lang', { detail: { lang: to, words: BANDS[to] } }));
+  if (manifestoOn) {
+    const d = delayFor(manifesto);
+    manifesto.querySelectorAll('.w').forEach((w, i) => {
+      const n = w.firstChild; if (!n) return;
+      const target = n.nodeValue;
+      scramble(n, [...target].map(glyphFor).join(''), target, { dur: 700 + Math.random() * 400, delay: d + i * 22 });
+    });
+  }
 }
 
-// load the other language's fonts before the swap, so nothing re-flows mid-animation
+// load the other language's fonts before the swap
 const FONTS = {
   uk: ['800 60px "Fira Sans Extra Condensed"', '600 30px "Fira Sans Extra Condensed"', '400 16px "Fira Sans"', '500 16px "Fira Sans"', 'italic 500 22px "Cormorant Garamond"', '500 12px "JetBrains Mono"'],
   en: ['800 60px "Archivo"', '400 16px "Archivo"', 'italic 400 22px "Instrument Serif"', '500 12px "JetBrains Mono"'],
@@ -486,23 +550,22 @@ async function switchTo(to) {
   const u = new URL(location.href);
   if (u.searchParams.has('lang')) { u.searchParams.delete('lang'); history.replaceState(null, '', u.pathname + u.search + u.hash); }
   document.querySelectorAll('[data-lang-switch] [data-l]').forEach((s) => s.classList.toggle('is-on', s.dataset.l === to));
-  const fonts = loadFonts(to);
-  if (reduced) { await fonts; apply(to); window.dispatchEvent(new Event('resize')); busy = false; return; }
-  // 1) the page softly goes out of focus  2) words change  3) it slowly comes back into focus
-  root.classList.add('lang-anim', 'lang-swap');
-  await Promise.all([fonts, wait(420)]);
+  await loadFonts(to);
   const keep = anchor();
-  apply(to);
+  apply(to, !reduced);
   window.dispatchEvent(new Event('resize'));
-  keep();
-  await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
-  root.classList.remove('lang-swap');
-  await wait(900);
-  root.classList.remove('lang-anim');
+  // while the words change length, keep the reader's spot steady — unless they start scrolling themselves
+  let user = false;
+  const stop = () => { user = true; };
+  const evs = ['wheel', 'touchstart', 'keydown'];
+  evs.forEach((e) => window.addEventListener(e, stop, { passive: true, once: true }));
+  const end = performance.now() + (reduced ? 0 : 1900);
+  await new Promise((res) => (function hold() { if (!user) keep(); if (performance.now() < end) requestAnimationFrame(hold); else res(); })());
+  evs.forEach((e) => window.removeEventListener(e, stop));
   busy = false;
 }
 
-if (lang === 'uk') apply('uk', true);
+if (lang === 'uk') apply('uk');
 document.querySelectorAll('[data-lang-switch]').forEach((b) => {
   b.querySelectorAll('[data-l]').forEach((s) => s.classList.toggle('is-on', s.dataset.l === lang));
   b.setAttribute('aria-label', lang === 'uk' ? 'Змінити мову' : 'Switch language');

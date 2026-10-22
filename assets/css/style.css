@@ -1156,12 +1156,4 @@ html[lang="uk"] .footer__giant { font-size: 30vw; }
 html[lang="uk"] .slit__text .spaced { letter-spacing: .4em; margin-right: -.4em; }
 @media (max-width: 640px) { html[lang="uk"] .slit__text .spaced { letter-spacing: .22em; margin-right: -.22em; } }
 
-/* language switch: a slow focus-pull — the page drifts out of focus, the words change, it settles back */
-html.lang-anim :is(main, footer, .nav__links, .nav .status, .logo__text, .menu__links, .menu__foot) {
-  transition: opacity .9s cubic-bezier(.22, 1, .36, 1), filter .9s cubic-bezier(.22, 1, .36, 1), transform .9s cubic-bezier(.22, 1, .36, 1);
-}
-html.lang-anim.lang-swap :is(main, footer, .nav__links, .nav .status, .logo__text, .menu__links, .menu__foot) {
-  opacity: .08; filter: blur(10px); transform: translateY(6px);
-  transition: opacity .42s cubic-bezier(.55, 0, .45, 1), filter .42s cubic-bezier(.55, 0, .45, 1), transform .42s cubic-bezier(.55, 0, .45, 1);
-}
 .lang span { transition: background .35s var(--ease), color .35s var(--ease), opacity .35s ease; }
