@@ -1157,3 +1157,17 @@ html[lang="uk"] .slit__text .spaced { letter-spacing: .4em; margin-right: -.4em;
 @media (max-width: 640px) { html[lang="uk"] .slit__text .spaced { letter-spacing: .22em; margin-right: -.22em; } }
 
 .lang span { transition: background .35s var(--ease), color .35s var(--ease), opacity .35s ease; }
+
+/* responsive polish (both languages) */
+.nav__links a, .nav .status, .logo__text { white-space: nowrap; }
+@media (max-width: 1180px) { html[lang="uk"] .logo__text { display: none; } }
+/* portrait tablets: keep the stacked name clear of the head */
+@media (min-width: 641px) and (max-width: 960px) {
+  .hero__name { top: 21%; font-size: min(24vw, 17.5vh); }
+  .hero__figure { height: 60%; }
+}
+/* small or short phones: drop the corner labels that would collide with the name */
+@media (max-width: 360px), (max-width: 960px) and (max-height: 700px) {
+  .hero__top { display: none; }
+}
+@media (max-width: 360px) { .hero__intro .mono { display: none; } }

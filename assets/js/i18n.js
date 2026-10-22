@@ -13,7 +13,7 @@ const TEXT = {
   'About': 'Про мене',
   'Experience': 'Досвід',
   'Links': 'Посилання',
-  'Available now': 'Вільний для проєктів',
+  'Available now': 'Беру проєкти',
   'Contact': 'Контакти',
   'LinkedIn ↗': 'LinkedIn ↗',
   'Mykola Zozul': 'Микола Зозуль',
