@@ -16,6 +16,7 @@
         if (q === 'uk' || q === 'en') localStorage.setItem('mz-lang', q);
         var l = localStorage.getItem('mz-lang') || ((navigator.languages || [navigator.language]).some(function (x) { return /^uk/i.test(x); }) ? 'uk' : 'en');
         if (l === 'uk') { var h = document.documentElement; h.lang = 'uk'; h.classList.add('i18n-pending'); setTimeout(function () { h.classList.remove('i18n-pending'); }, 1500); }
+        if (sessionStorage.getItem('mz-lang-anim') !== null) { var r = document.documentElement; r.classList.add('lang-in'); r.setAttribute('data-lang-to', l === 'uk' ? 'UA' : 'EN'); setTimeout(function () { r.classList.remove('lang-in', 'lang-in-go'); }, 2500); }
       } catch (e) {}
     })();
   </script>

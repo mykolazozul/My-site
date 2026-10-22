@@ -389,6 +389,7 @@ const ATTR = {
 };
 
 const root = document.documentElement;
+const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 export const isUk = root.lang === 'uk';
 const norm = (s) => s.replace(/\s+/g, ' ').trim();
 
@@ -443,9 +444,17 @@ function wireSwitch() {
     b.setAttribute('aria-label', isUk ? 'Змінити мову' : 'Switch language');
     b.querySelectorAll('[data-l]').forEach((s) => s.classList.toggle('is-on', s.dataset.l === (isUk ? 'uk' : 'en')));
     b.addEventListener('click', () => {
-      try { localStorage.setItem('mz-lang', isUk ? 'en' : 'uk'); } catch (e) {}
+      if (root.classList.contains('lang-out')) return;
+      const to = isUk ? 'en' : 'uk';
+      try { localStorage.setItem('mz-lang', to); sessionStorage.setItem('mz-lang-anim', String(Math.round(scrollY))); } catch (e) {}
+      document.querySelectorAll('[data-lang-switch] [data-l]').forEach((s) => s.classList.toggle('is-on', s.dataset.l === to));
       const u = new URL(location.href); u.searchParams.delete('lang');
-      location.replace(u.pathname + u.search + u.hash);
+      const go = () => location.replace(u.pathname + u.search + u.hash);
+      if (reduced) return go();
+      // a curtain with the new language rises over the page, the page reloads behind it
+      root.setAttribute('data-lang-to', to === 'uk' ? 'UA' : 'EN');
+      root.classList.add('lang-out');
+      setTimeout(go, 700);
     });
   });
 }
@@ -453,3 +462,19 @@ function wireSwitch() {
 if (isUk) applyUk();
 wireSwitch();
 root.classList.remove('i18n-pending');
+
+// after a language switch: back to the same scroll position, then the curtain lifts away
+(function langIn() {
+  let y = null;
+  try { y = sessionStorage.getItem('mz-lang-anim'); sessionStorage.removeItem('mz-lang-anim'); } catch (e) {}
+  if (y === null || !root.classList.contains('lang-in')) return;
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  const lift = () => {
+    window.scrollTo({ top: +y || 0, behavior: 'instant' });
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      root.classList.add('lang-in-go');
+      setTimeout(() => root.classList.remove('lang-in', 'lang-in-go'), 1000);
+    }));
+  };
+  (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => setTimeout(lift, 120));
+})();

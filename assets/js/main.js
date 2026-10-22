@@ -374,14 +374,6 @@ function scrollScene() {
   const stripsBox = $('[data-strips]');
   const triImg = $('[data-tri] img');
 
-  const mouse = { x: 0, y: 0, tx: 0, ty: 0 };
-  if (finePointer && !reduced) {
-    window.addEventListener('pointermove', (e) => {
-      mouse.tx = e.clientX / window.innerWidth - 0.5;
-      mouse.ty = e.clientY / window.innerHeight - 0.5;
-    }, { passive: true });
-  }
-
   let lastY = window.scrollY, navHidden = false;
   let vh = window.innerHeight;
   window.addEventListener('resize', () => (vh = window.innerHeight));
@@ -400,16 +392,14 @@ function scrollScene() {
       }
     }
 
-    // hero parallax
-    mouse.x = lerp(mouse.x, mouse.tx, 0.06);
-    mouse.y = lerp(mouse.y, mouse.ty, 0.06);
+    // hero parallax (scroll only — the hero ignores the mouse)
     if (hero && y < vh * 1.2 && !reduced) {
       const p = clamp(y / vh);
       if (heroName) {
-        heroName.style.transform = `translate3d(${mouse.x * -26}px, calc(-50% + ${y * 0.42 + mouse.y * -10}px), 0)`;
+        heroName.style.transform = `translate3d(0, calc(-50% + ${y * 0.42}px), 0)`;
         heroName.style.opacity = String(1 - p * 1.1);
       }
-      if (heroFig) heroFig.style.transform = `translate3d(calc(-42% + ${mouse.x * 18}px), ${y * 0.12 + mouse.y * 6}px, 0) scale(${1 + p * 0.06})`;
+      if (heroFig) heroFig.style.transform = `translate3d(-42%, ${y * 0.12}px, 0) scale(${1 + p * 0.06})`;
       hero.style.setProperty('--hp', easeInOut(p).toFixed(3));
     }
 

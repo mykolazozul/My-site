@@ -37,6 +37,7 @@
         if (q === 'uk' || q === 'en') localStorage.setItem('mz-lang', q);
         var l = localStorage.getItem('mz-lang') || ((navigator.languages || [navigator.language]).some(function (x) { return /^uk/i.test(x); }) ? 'uk' : 'en');
         if (l === 'uk') { var h = document.documentElement; h.lang = 'uk'; h.classList.add('i18n-pending'); setTimeout(function () { h.classList.remove('i18n-pending'); }, 1500); }
+        if (sessionStorage.getItem('mz-lang-anim') !== null) { var r = document.documentElement; r.classList.add('lang-in'); r.setAttribute('data-lang-to', l === 'uk' ? 'UA' : 'EN'); setTimeout(function () { r.classList.remove('lang-in', 'lang-in-go'); }, 2500); }
       } catch (e) {}
     })();
   </script>
@@ -173,8 +174,8 @@
           </div>
           <div class="hero__cta fade-up" style="--d:.3s">
             <div class="hero__cta-row">
-              <a class="btn btn--solid" href="#contact" data-magnetic>Start a project <svg class="arrow"><use href="#i-arrow"/></svg></a>
-              <a class="btn" href="#work" data-magnetic>View work <svg class="arrow"><use href="#i-down"/></svg></a>
+              <a class="btn btn--solid" href="#contact">Start a project <svg class="arrow"><use href="#i-arrow"/></svg></a>
+              <a class="btn" href="#work">View work <svg class="arrow"><use href="#i-down"/></svg></a>
             </div>
             <span class="scroll-cue mono">Scroll <i></i></span>
           </div>
