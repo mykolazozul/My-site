@@ -536,10 +536,65 @@ const loadFonts = (to) => (document.fonts ? Promise.all(FONTS[to].map((f) => doc
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // keep whatever is in the middle of the screen in place while the text re-flows
+// (layout position, not the painted one, so in-flight transforms don't make the page jump)
+const docTop = (el) => { let y = 0; for (let e = el; e; e = e.offsetParent) y += e.offsetTop; return y; };
 function anchor() {
-  const el = document.elementFromPoint(innerWidth / 2, innerHeight * 0.4);
-  const top = el ? el.getBoundingClientRect().top : 0;
-  return () => { if (el && el.isConnected) { const d = el.getBoundingClientRect().top - top; if (Math.abs(d) > 1) window.scrollTo({ top: scrollY + d, behavior: 'instant' }); } };
+  let el = document.elementFromPoint(innerWidth / 2, innerHeight * 0.4);
+  while (el && !(el instanceof HTMLElement && el.offsetParent !== null)) el = el.parentElement;
+  const top = el ? docTop(el) - scrollY : 0;
+  return () => { if (el && el.isConnected) { const d = docTop(el) - scrollY - top; if (Math.abs(d) > 1) window.scrollTo({ top: scrollY + d, behavior: 'instant' }); } };
+}
+
+/* ---------------------------------------------------------------- rise: lines slide up and out, the new ones rise in from below */
+// pick the style with ?anim=rise or ?anim=scramble (remembered)
+let STYLE = 'scramble';
+try {
+  const q = new URLSearchParams(location.search).get('anim');
+  if (q === 'rise' || q === 'scramble') localStorage.setItem('mz-lang-style', q);
+  STYLE = localStorage.getItem('mz-lang-style') || 'scramble';
+} catch (e) {}
+
+const EASE_OUT = 'cubic-bezier(.22, 1, .36, 1)', EASE_IN = 'cubic-bezier(.55, 0, .75, .2)';
+const blockOf = (el) => { while (el && el !== document.body && getComputedStyle(el).display === 'inline') el = el.parentElement; return el; };
+
+// visible blocks that carry translatable text (outermost only, so nothing animates twice)
+function riseTargets() {
+  const set = new Set();
+  for (const { n } of texts) {
+    const el = n.parentElement && blockOf(n.parentElement);
+    if (el && !el.closest('.hero__word, [data-giant]') && onScreen(el)) set.add(el);
+  }
+  if (manifesto && onScreen(manifesto)) set.add(manifesto);
+  return [...set].filter((el) => ![...set].some((o) => o !== el && o.contains(el)));
+}
+const letterSets = () => [...document.querySelectorAll('.hero__word, [data-giant]')].filter(onScreen);
+
+async function rise(to) {
+  const blocks = riseTargets(), words = letterSets();
+  const order = (el) => Math.max(0, Math.min(1, el.getBoundingClientRect().top / innerHeight));
+  // out: each block lifts a little and fades; each letter of the name slides up behind its mask
+  const outs = [];
+  blocks.forEach((el) => outs.push(el.animate(
+    [{ transform: 'none', opacity: 1 }, { transform: 'translateY(-0.45em)', opacity: 0 }],
+    { duration: 320, delay: order(el) * 160, easing: EASE_IN, fill: 'forwards' })));
+  words.forEach((w) => [...w.children].forEach((ch, i) => outs.push(ch.animate(
+    [{ transform: 'translateY(0)' }, { transform: 'translateY(-105%)' }],
+    { duration: 380, delay: i * 28, easing: EASE_IN, fill: 'forwards' }))));
+  await Promise.all(outs.map((a) => a.finished.catch(() => {})));
+
+  apply(to, false);
+  window.dispatchEvent(new Event('resize'));
+
+  // in: the new text rises from below into place, top of the screen first
+  blocks.forEach((el) => {
+    el.animate([{ transform: 'translateY(0.6em)', opacity: 0 }, { transform: 'none', opacity: 1 }],
+      { duration: 760, delay: 40 + order(el) * 260, easing: EASE_OUT, fill: 'backwards' });
+  });
+  words.forEach((w) => [...w.children].forEach((ch, i) => ch.animate(
+    [{ transform: 'translateY(105%)' }, { transform: 'translateY(0)' }],
+    { duration: 900, delay: 60 + i * 45, easing: EASE_OUT, fill: 'backwards' })));
+  outs.forEach((a) => a.cancel());
+  return 1100;
 }
 
 let busy = false;
@@ -552,15 +607,18 @@ async function switchTo(to) {
   document.querySelectorAll('[data-lang-switch] [data-l]').forEach((s) => s.classList.toggle('is-on', s.dataset.l === to));
   await loadFonts(to);
   const keep = anchor();
-  apply(to, !reduced);
+  let hold = 1900;
+  if (reduced) { apply(to, false); hold = 0; }
+  else if (STYLE === 'rise') hold = await rise(to);
+  else apply(to, true);
   window.dispatchEvent(new Event('resize'));
   // while the words change length, keep the reader's spot steady — unless they start scrolling themselves
   let user = false;
   const stop = () => { user = true; };
   const evs = ['wheel', 'touchstart', 'keydown'];
   evs.forEach((e) => window.addEventListener(e, stop, { passive: true, once: true }));
-  const end = performance.now() + (reduced ? 0 : 1900);
-  await new Promise((res) => (function hold() { if (!user) keep(); if (performance.now() < end) requestAnimationFrame(hold); else res(); })());
+  const end = performance.now() + hold;
+  await new Promise((res) => (function frame() { if (!user) keep(); if (performance.now() < end) requestAnimationFrame(frame); else res(); })());
   evs.forEach((e) => window.removeEventListener(e, stop));
   busy = false;
 }
