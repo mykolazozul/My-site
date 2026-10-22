@@ -451,10 +451,10 @@ function wireSwitch() {
       const u = new URL(location.href); u.searchParams.delete('lang');
       const go = () => location.replace(u.pathname + u.search + u.hash);
       if (reduced) return go();
-      // a curtain with the new language rises over the page, the page reloads behind it
-      root.setAttribute('data-lang-to', to === 'uk' ? 'UA' : 'EN');
+      // the page softly blurs out while the new language name appears, then reloads behind the veil
+      root.setAttribute('data-lang-to', to === 'uk' ? 'Українська' : 'English');
       root.classList.add('lang-out');
-      setTimeout(go, 700);
+      setTimeout(go, 650);
     });
   });
 }
@@ -463,7 +463,7 @@ if (isUk) applyUk();
 wireSwitch();
 root.classList.remove('i18n-pending');
 
-// after a language switch: back to the same scroll position, then the curtain lifts away
+// after a language switch: back to the same scroll position, then the veil dissolves
 (function langIn() {
   let y = null;
   try { y = sessionStorage.getItem('mz-lang-anim'); sessionStorage.removeItem('mz-lang-anim'); } catch (e) {}
@@ -473,7 +473,7 @@ root.classList.remove('i18n-pending');
     window.scrollTo({ top: +y || 0, behavior: 'instant' });
     requestAnimationFrame(() => requestAnimationFrame(() => {
       root.classList.add('lang-in-go');
-      setTimeout(() => root.classList.remove('lang-in', 'lang-in-go'), 1000);
+      setTimeout(() => root.classList.remove('lang-in', 'lang-in-go'), 1400);
     }));
   };
   (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => setTimeout(lift, 120));
