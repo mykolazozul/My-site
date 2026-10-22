@@ -362,7 +362,9 @@ function scrollScene() {
   const heroName = $('[data-hero-name]');
   const heroFig = $('[data-hero-figure]');
   const manifesto = $('[data-words]');
-  const words = manifesto ? splitWords(manifesto) : [];
+  let words = manifesto ? splitWords(manifesto) : [];
+  // the language switch puts fresh markup into the manifesto
+  window.addEventListener('mz:lang', () => { if (manifesto) words = splitWords(manifesto); });
   const slit = $('[data-slit]');
   const slitWin = slit && $('.slit__window', slit);
   const slitText = slit && $('.slit__text', slit);

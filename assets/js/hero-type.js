@@ -29,7 +29,7 @@ function strip(text, px, extra, style) {
 
 export function initHeroType(canvas, { reduced = false } = {}) {
   const hero = canvas.closest('.hero') || canvas.parentElement;
-  if (canvas.dataset.words) WORDS = canvas.dataset.words.split(',');
+  if (canvas.dataset.bandWords) WORDS = canvas.dataset.bandWords.split(',');
   FONT = getComputedStyle(document.documentElement).getPropertyValue('--display').trim() || FONT;
   const ctx = canvas.getContext('2d');
   const DPR = Math.min(window.devicePixelRatio || 1, 1.75);
@@ -136,6 +136,13 @@ export function initHeroType(canvas, { reduced = false } = {}) {
     else new MutationObserver((_, mo) => { if (root.classList.contains('is-loaded')) { mo.disconnect(); startIntro(); } })
       .observe(root, { attributes: true, attributeFilter: ['class'] });
     (function loop(t) { frame(t); requestAnimationFrame(loop); })(performance.now());
+  });
+
+  // language switch: same motion, new words and typeface
+  window.addEventListener('mz:lang', (e) => {
+    WORDS = e.detail.words;
+    FONT = getComputedStyle(document.documentElement).getPropertyValue('--display').trim() || FONT;
+    if (ready) build();
   });
 
   new IntersectionObserver(([e]) => { visible = e.isIntersecting; }).observe(hero);

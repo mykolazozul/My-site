@@ -1,6 +1,6 @@
-// Ukrainian version. The HTML is written in English; when the visitor's language is Ukrainian
-// (chosen with the EN / UA switch, ?lang=uk, or the browser language) every text node and a few
-// attributes are swapped from this dictionary before the page's own scripts run.
+// Ukrainian version. The HTML is written in English; every translatable text node and attribute is
+// recorded once and swapped from this dictionary — on load (EN / UA switch choice, ?lang=uk or the
+// browser language) and in place, with a soft focus-pull, when the visitor flips the switch.
 
 const TEXT = {
   // nav, menu, preloader
@@ -390,23 +390,41 @@ const ATTR = {
 
 const root = document.documentElement;
 const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-export const isUk = root.lang === 'uk';
 const norm = (s) => s.replace(/\s+/g, ' ').trim();
+let lang = root.lang === 'uk' ? 'uk' : 'en';
 
 // translate a string used by scripts (falls back to English)
-export const t = (en) => (isUk && TEXT[en]) || en;
+export const t = (en) => (lang === 'uk' && TEXT[en]) || en;
+export const getLang = () => lang;
 window.mzT = t;
 
-function swapText(el) {
+const NAME = { en: ['Mykola', 'Zozul'], uk: ['Микола', 'Зозуль'] };
+const BANDS = { en: ['DESIGN', 'STRATEGY', 'BRAND', 'PRODUCT', 'GROWTH'], uk: ['ДИЗАЙН', 'СТРАТЕГІЯ', 'БРЕНД', 'ПРОДУКТ', 'ЗРОСТАННЯ'] };
+const SKIP = 'script, style, svg, .hero__word, [data-giant], [data-i18n-skip], [data-words]';
+
+// everything translatable is recorded once, in English, so the page can switch both ways in place
+const texts = [], attrs = [];
+(function collect(el) {
   for (const n of el.childNodes) {
-    if (n.nodeType === 3) {
-      const k = norm(n.nodeValue);
-      if (k && TEXT[k] !== undefined) {
-        const lead = n.nodeValue.match(/^\s*/)[0], trail = n.nodeValue.match(/\s*$/)[0];
-        n.nodeValue = lead + TEXT[k] + trail;
-      }
-    } else if (n.nodeType === 1 && !n.matches('script, style, svg, .hero__word, [data-giant], [data-i18n-skip]')) swapText(n);
+    if (n.nodeType === 3) { const k = norm(n.nodeValue); if (k && TEXT[k] !== undefined) texts.push({ n, k }); }
+    else if (n.nodeType === 1 && !n.matches(SKIP)) collect(n);
   }
+})(document.body);
+document.querySelectorAll('[placeholder], [aria-label], [alt], [data-copy-done]').forEach((el) => {
+  for (const a of ['placeholder', 'aria-label', 'alt', 'data-copy-done']) {
+    const v = el.getAttribute(a);
+    if (v && (ATTR[v] || TEXT[v])) attrs.push({ el, a, en: v, uk: ATTR[v] || TEXT[v] });
+  }
+});
+const meta = document.querySelector('meta[name="description"]');
+const heads = { title: document.title, desc: meta ? meta.content : '' };
+// the manifesto gets split into words by main.js, so both versions are kept as markup
+const manifesto = document.querySelector('[data-words]');
+const manifestoHTML = { en: manifesto ? manifesto.innerHTML : '' };
+if (manifesto) {
+  const c = manifesto.cloneNode(true);
+  (function tr(el) { for (const n of el.childNodes) { if (n.nodeType === 3) { const k = norm(n.nodeValue); if (TEXT[k]) n.nodeValue = n.nodeValue.match(/^\s*/)[0] + TEXT[k] + n.nodeValue.match(/\s*$/)[0]; } else if (n.nodeType === 1) tr(n); } })(c);
+  manifestoHTML.uk = c.innerHTML;
 }
 
 // split letters for the animated hero name and the giant footer word
@@ -419,62 +437,75 @@ function letters(el, word, start) {
   });
 }
 
-function applyUk() {
-  swapText(document.body);
-  document.querySelectorAll('[placeholder], [aria-label], [alt], [data-copy-done]').forEach((el) => {
-    for (const a of ['placeholder', 'aria-label', 'alt', 'data-copy-done']) {
-      const v = el.getAttribute(a);
-      if (v && (ATTR[v] || TEXT[v])) el.setAttribute(a, ATTR[v] || TEXT[v]);
-    }
-  });
-  if (ATTR[document.title]) document.title = ATTR[document.title];
-  const desc = document.querySelector('meta[name="description"]');
-  if (desc && ATTR[desc.content]) desc.content = ATTR[desc.content];
+function apply(to, initial = false) {
+  lang = to;
+  root.lang = to;
+  const uk = to === 'uk';
+  for (const { n, k } of texts) {
+    const v = n.nodeValue, val = uk ? TEXT[k] : k;
+    n.nodeValue = v.match(/^\s*/)[0] + val + v.match(/\s*$/)[0];
+  }
+  for (const { el, a, en, uk: u } of attrs) el.setAttribute(a, uk ? u : en);
+  document.title = uk ? (ATTR[heads.title] || heads.title) : heads.title;
+  if (meta) meta.content = uk ? (ATTR[heads.desc] || heads.desc) : heads.desc;
   const words = document.querySelectorAll('.hero__word');
-  if (words.length === 2) { letters(words[0], 'Микола', 0); letters(words[1], 'Зозуль', 6); }
+  if (words.length === 2 && !(initial && !uk)) { letters(words[0], NAME[to][0], 0); letters(words[1], NAME[to][1], NAME[to][0].length); }
   const giant = document.querySelector('[data-giant]');
-  if (giant) letters(giant, 'Зозуль', 0);
+  if (giant && !(initial && !uk)) letters(giant, NAME[to][1], 0);
+  if (manifesto && !initial) manifesto.innerHTML = manifestoHTML[to];
+  else if (manifesto && uk) manifesto.innerHTML = manifestoHTML.uk;
   const type = document.querySelector('.hero__type');
-  if (type) type.dataset.words = 'ДИЗАЙН,СТРАТЕГІЯ,БРЕНД,ПРОДУКТ,ЗРОСТАННЯ';
-}
-
-// EN / UA switch: remember the choice and reload (scripts that split text run once, on load)
-function wireSwitch() {
+  if (type) type.dataset.bandWords = BANDS[to].join(',');
   document.querySelectorAll('[data-lang-switch]').forEach((b) => {
-    b.setAttribute('aria-label', isUk ? 'Змінити мову' : 'Switch language');
-    b.querySelectorAll('[data-l]').forEach((s) => s.classList.toggle('is-on', s.dataset.l === (isUk ? 'uk' : 'en')));
-    b.addEventListener('click', () => {
-      if (root.classList.contains('lang-out')) return;
-      const to = isUk ? 'en' : 'uk';
-      try { localStorage.setItem('mz-lang', to); sessionStorage.setItem('mz-lang-anim', String(Math.round(scrollY))); } catch (e) {}
-      document.querySelectorAll('[data-lang-switch] [data-l]').forEach((s) => s.classList.toggle('is-on', s.dataset.l === to));
-      const u = new URL(location.href); u.searchParams.delete('lang');
-      const go = () => location.replace(u.pathname + u.search + u.hash);
-      if (reduced) return go();
-      // the page softly blurs out while the new language name appears, then reloads behind the veil
-      root.setAttribute('data-lang-to', to === 'uk' ? 'Українська' : 'English');
-      root.classList.add('lang-out');
-      setTimeout(go, 650);
-    });
+    b.setAttribute('aria-label', uk ? 'Змінити мову' : 'Switch language');
+    b.querySelectorAll('[data-l]').forEach((s) => s.classList.toggle('is-on', s.dataset.l === to));
   });
+  if (!initial) window.dispatchEvent(new CustomEvent('mz:lang', { detail: { lang: to, words: BANDS[to] } }));
 }
 
-if (isUk) applyUk();
-wireSwitch();
-root.classList.remove('i18n-pending');
+// load the other language's fonts before the swap, so nothing re-flows mid-animation
+const FONTS = {
+  uk: ['800 60px "Fira Sans Extra Condensed"', '600 30px "Fira Sans Extra Condensed"', '400 16px "Fira Sans"', '500 16px "Fira Sans"', 'italic 500 22px "Cormorant Garamond"', '500 12px "JetBrains Mono"'],
+  en: ['800 60px "Archivo"', '400 16px "Archivo"', 'italic 400 22px "Instrument Serif"', '500 12px "JetBrains Mono"'],
+};
+const loadFonts = (to) => (document.fonts ? Promise.all(FONTS[to].map((f) => document.fonts.load(f, 'Hello Привіт'))).catch(() => {}) : Promise.resolve());
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
-// after a language switch: back to the same scroll position, then the veil dissolves
-(function langIn() {
-  let y = null;
-  try { y = sessionStorage.getItem('mz-lang-anim'); sessionStorage.removeItem('mz-lang-anim'); } catch (e) {}
-  if (y === null || !root.classList.contains('lang-in')) return;
-  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-  const lift = () => {
-    window.scrollTo({ top: +y || 0, behavior: 'instant' });
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      root.classList.add('lang-in-go');
-      setTimeout(() => root.classList.remove('lang-in', 'lang-in-go'), 1400);
-    }));
-  };
-  (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => setTimeout(lift, 120));
-})();
+// keep whatever is in the middle of the screen in place while the text re-flows
+function anchor() {
+  const el = document.elementFromPoint(innerWidth / 2, innerHeight * 0.4);
+  const top = el ? el.getBoundingClientRect().top : 0;
+  return () => { if (el && el.isConnected) { const d = el.getBoundingClientRect().top - top; if (Math.abs(d) > 1) window.scrollTo({ top: scrollY + d, behavior: 'instant' }); } };
+}
+
+let busy = false;
+async function switchTo(to) {
+  if (busy || to === lang) return;
+  busy = true;
+  try { localStorage.setItem('mz-lang', to); } catch (e) {}
+  const u = new URL(location.href);
+  if (u.searchParams.has('lang')) { u.searchParams.delete('lang'); history.replaceState(null, '', u.pathname + u.search + u.hash); }
+  document.querySelectorAll('[data-lang-switch] [data-l]').forEach((s) => s.classList.toggle('is-on', s.dataset.l === to));
+  const fonts = loadFonts(to);
+  if (reduced) { await fonts; apply(to); window.dispatchEvent(new Event('resize')); busy = false; return; }
+  // 1) the page softly goes out of focus  2) words change  3) it slowly comes back into focus
+  root.classList.add('lang-anim', 'lang-swap');
+  await Promise.all([fonts, wait(420)]);
+  const keep = anchor();
+  apply(to);
+  window.dispatchEvent(new Event('resize'));
+  keep();
+  await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+  root.classList.remove('lang-swap');
+  await wait(900);
+  root.classList.remove('lang-anim');
+  busy = false;
+}
+
+if (lang === 'uk') apply('uk', true);
+document.querySelectorAll('[data-lang-switch]').forEach((b) => {
+  b.querySelectorAll('[data-l]').forEach((s) => s.classList.toggle('is-on', s.dataset.l === lang));
+  b.setAttribute('aria-label', lang === 'uk' ? 'Змінити мову' : 'Switch language');
+  b.addEventListener('click', () => switchTo(lang === 'uk' ? 'en' : 'uk'));
+});
+root.classList.remove('i18n-pending');
